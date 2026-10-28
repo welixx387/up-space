@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UP Space</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="UP Space — студия альфагравити, массажа, йоги, растяжки и телесных практик в Санкт-Петербурге, Загородный проспект, 37/70.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Onest:wght@400;500;600&display=swap">
+<style>
+html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+/* Layout: sky hero with live hanging silks over a floor-standing headline → manifesto → practice index (accordion) → to-scale weekly timetable → masters as credits → coral contact band */
+:root{
+  --sky-top:#C9D6E2; --sky:#E4EAF0; --paper:#F3F5F7; --ink:#12161D; --muted:#566170; --line:#CCD5DE;
+  --silk:#EE5B37; --silk-back:#C2401F; --silk-hi:#FFB08F; --on-silk:#1B0E09;
+  --f-display:"Dela Gothic One","Arial Black","Helvetica Neue",sans-serif;
+  --f-body:"Onest","Segoe UI","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sky-top:#070B12; --sky:#111A27; --paper:#0E151F; --ink:#E9EEF3; --muted:#91A0B0; --line:#25313F;
+  --silk:#F2683F; --silk-back:#A8361A; --silk-hi:#FFA27C; --on-silk:#1B0E09; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --sky-top:#070B12; --sky:#111A27; --paper:#0E151F; --ink:#E9EEF3; --muted:#91A0B0; --line:#25313F;
+  --silk:#F2683F; --silk-back:#A8361A; --silk-hi:#FFA27C; --on-silk:#1B0E09; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);font:17px/1.6 var(--f-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--sky-top)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--silk);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+h2{font:400 clamp(2.1rem,5.2vw,4rem)/1 var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance;text-transform:uppercase}
+p{margin:0}
+.kicker{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:22px;height:2px;background:var(--silk)}
+
+/* ───────── hero ───────── */
+.hero{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--sky-top),var(--sky) 75%);
+  min-height:clamp(640px,96svh,940px);display:grid;grid-template-rows:auto 1fr auto;touch-action:pan-y}
+.hero>.wrap{width:100%}
+#silk{position:absolute;inset:0;width:100%;height:100%;z-index:2;cursor:grab}
+#silk:active{cursor:grabbing}
+.hero-top,.hero-mid{position:relative;z-index:3;pointer-events:none}
+.hero-top a,.hero-mid a,.hero-mid button{pointer-events:auto}
+.hero-top{display:flex;align-items:center;gap:28px;padding-block:22px}
+.logo{font:400 1.25rem/1 var(--f-display);text-decoration:none;letter-spacing:.02em;text-transform:uppercase}
+.hero-top nav{display:flex;gap:26px;margin-left:auto}
+.hero-top nav a,.hero-top .tel{text-decoration:none;font-size:.95rem}
+.hero-top nav a{color:var(--muted)}
+.hero-top nav a:hover{color:var(--ink)}
+.hero-top .tel{font-weight:600;font-variant-numeric:tabular-nums}
+@media (max-width:900px){.hero-top nav{display:none}.hero-top .tel{margin-left:auto}}
+.hero-mid{display:flex;flex-direction:column;justify-content:center;padding-block:40px 44px}
+.col{display:flex;flex-direction:column;gap:30px;max-width:min(720px,58%)}
+.lede{font:500 clamp(1.55rem,3vw,2.6rem)/1.12 var(--f-body);letter-spacing:-.02em;max-width:19ch;text-wrap:balance}
+.lede span{color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px}
+.ghost-link{font-weight:600;text-decoration:none;border-bottom:2px solid var(--silk);padding-bottom:2px}
+.meta-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:26px 44px}
+.stats{display:flex;flex-wrap:wrap;gap:18px 36px}
+.stats div{display:flex;flex-direction:column}
+.stats b{font:400 clamp(1.7rem,2.8vw,2.4rem)/1 var(--f-display)}
+.stats span{font-size:.85rem;color:var(--muted);margin-top:8px}
+.today{display:flex;flex-direction:column;gap:12px;align-self:flex-start;padding:16px 20px 18px;border-radius:6px;background:color-mix(in srgb,var(--paper) 70%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);max-width:100%}
+.today .lbl{font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:9px}
+.today .lbl i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--silk);animation:pulse 2.2s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--silk) 60%,transparent)}100%{box-shadow:0 0 0 9px transparent}}
+@media (prefers-reduced-motion: reduce){.today .lbl i{animation:none}}
+.today ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 22px}
+.today li a{display:flex;gap:10px;align-items:baseline;text-decoration:none;font-size:.97rem}
+.today li b{font-variant-numeric:tabular-nums;font-weight:600}
+.today li.past{opacity:.45}
+.today li.next b{color:var(--silk)}
+.cta{display:inline-flex;align-items:center;gap:12px;align-self:flex-start;padding:15px 24px 15px 26px;border-radius:999px;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:600;transition:gap .25s, background .25s}
+.cta:hover{gap:18px;background:var(--silk);color:var(--on-silk)}
+.hint{font-size:.85rem;color:var(--muted);display:inline-flex;align-items:center;gap:8px}
+.hint svg{flex:none}
+.hint .t{display:none}
+@media (hover:none){.hint .m{display:none}.hint .t{display:inline}}
+@media (min-width:901px){.hero-mid .hint{position:absolute;right:max(20px,env(safe-area-inset-right,0px));bottom:40px}}
+@media (max-width:900px){.hero-mid .hint{margin-top:22px}}
+.floor{position:relative;z-index:1}
+.fit{line-height:0}
+#big{display:inline-block;white-space:nowrap;font:400 15vw/.78 var(--f-display);letter-spacing:-.025em;text-transform:uppercase;transform:translateY(.09em)}
+@media (max-width:900px){.col{max-width:78%}}
+@media (max-width:560px){
+  .hero{min-height:0}
+  .col{max-width:100%;gap:24px}
+  .lede{font-size:clamp(1.4rem,6.4vw,1.8rem);max-width:74%}
+  .stats{gap:14px 26px;flex-wrap:nowrap}
+  .stats b{font-size:1.6rem}
+  .today{padding:14px 16px}
+  .today ul{flex-direction:column;gap:6px}
+}
+
+/* ───────── manifesto ───────── */
+section{padding-block:96px}
+@media (max-width:700px){section{padding-block:64px}}
+.manifest{background:var(--paper)}
+.manifest .big{font-size:clamp(1.55rem,3.3vw,2.55rem);line-height:1.22;font-weight:500;max-width:30ch;letter-spacing:-.01em;margin-top:26px;text-wrap:pretty}
+.manifest .big s{text-decoration:none;color:var(--muted);background:linear-gradient(var(--muted),var(--muted)) 0 55%/100% 2px no-repeat}
+.manifest .big mark{background:none;color:inherit;box-shadow:inset 0 -.2em 0 color-mix(in srgb,var(--silk) 45%,transparent)}
+.pluses{display:grid;grid-template-columns:repeat(3,1fr);gap:34px 40px;margin-top:64px;padding-top:34px;border-top:1px solid var(--line)}
+.pluses div{display:flex;flex-direction:column;gap:6px}
+.pluses b{font-weight:600}
+.pluses p{color:var(--muted);font-size:.97rem}
+@media (max-width:860px){.pluses{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.pluses{grid-template-columns:1fr;gap:24px}}
+
+/* ───────── practices index ───────── */
+.practices{background:var(--sky)}
+.sec-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 40px;margin-bottom:44px}
+.sec-head p{color:var(--muted);max-width:38ch}
+.index{border-top:2px solid var(--ink)}
+.row{border-bottom:1px solid var(--line)}
+.row summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) 230px 170px 40px;align-items:center;gap:20px;padding-block:24px;position:relative}
+.row summary::-webkit-details-marker{display:none}
+.row summary::after{content:"";position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--silk);transition:width .45s cubic-bezier(.2,.7,.2,1)}
+.row summary:hover::after,.row[open] summary::after{width:100%}
+.row h3{margin:0;font:400 clamp(1.45rem,3vw,2.3rem)/1.05 var(--f-display);text-transform:uppercase;letter-spacing:-.005em}
+.row .when{color:var(--muted);font-size:.95rem}
+.row .price{font-weight:600;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.plus{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--ink);position:relative;justify-self:end;transition:transform .3s,background .3s}
+.plus::before,.plus::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:1.5px;background:currentColor;transform:translate(-50%,-50%)}
+.plus::after{transform:translate(-50%,-50%) rotate(90deg);transition:transform .3s}
+.row[open] .plus{background:var(--ink);color:var(--sky)}
+.row[open] .plus::after{transform:translate(-50%,-50%) rotate(0)}
+.body{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:48px;padding:6px 0 40px}
+.body .desc{display:flex;flex-direction:column;gap:14px;max-width:60ch}
+.body ul{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.body li{padding-left:22px;position:relative}
+.body li::before{content:"";position:absolute;left:0;top:.72em;width:12px;height:2px;background:var(--silk)}
+.small{font-size:.88rem;color:var(--muted)}
+.facts{display:flex;flex-direction:column;gap:20px;padding:24px;background:var(--paper);border-radius:4px;align-self:start}
+.facts dl{margin:0;display:flex;flex-direction:column;gap:18px}
+.facts dt{font-size:.8rem;color:var(--muted);margin-bottom:4px}
+.facts dd{margin:0}
+.prices{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.prices td{padding:6px 0;border-bottom:1px dotted var(--line);vertical-align:top}
+.prices tr:last-child td{border-bottom:0}
+.prices td:last-child{text-align:right;font-weight:600;white-space:nowrap;padding-left:14px}
+.call{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:18px;border-top:1px solid var(--line)}
+.call a{font-weight:600;text-decoration:none;font-variant-numeric:tabular-nums;border-bottom:2px solid var(--silk)}
+@media (max-width:900px){
+  .row summary{grid-template-columns:minmax(0,1fr) 40px;gap:6px 16px}
+  .row h3{grid-column:1}
+  .row .when,.row .price{grid-column:1;text-align:left;grid-row:auto}
+  .row .plus{grid-column:2;grid-row:1}
+  .row .meta{display:flex;flex-wrap:wrap;gap:4px 14px;grid-column:1}
+  .body{grid-template-columns:1fr;gap:26px}
+}
+@media (min-width:901px){.row .meta{display:contents}}
+
+/* ───────── timetable ───────── */
+.week-sec{background:var(--paper)}
+.tt-scroll{overflow-x:auto;margin-inline:-4px;padding:4px 4px 16px}
+.tt{--h:46px;display:grid;grid-template-columns:52px repeat(7,minmax(96px,1fr));min-width:760px}
+.tt .hd{font-weight:600;font-size:.95rem;padding-bottom:12px;border-bottom:2px solid var(--ink)}
+.tt .hd.off{color:var(--muted)}
+.tt .hours,.tt .col{position:relative;height:calc(var(--h) * 13)}
+.tt .hours span{position:absolute;right:10px;transform:translateY(-50%);font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.tt .col{border-left:1px solid var(--line);background:repeating-linear-gradient(180deg,transparent 0 calc(var(--h) - 1px),var(--line) calc(var(--h) - 1px) var(--h))}
+.ev{position:absolute;left:5px;right:5px;border-radius:3px;padding:7px 9px;font-size:.8rem;line-height:1.25;text-decoration:none;background:var(--silk);color:var(--on-silk);overflow:hidden;transition:transform .2s}
+.ev:hover{transform:translateX(3px)}
+.ev b{display:block;font-variant-numeric:tabular-nums;font-weight:600}
+.ev.rare{background:repeating-linear-gradient(135deg,var(--silk) 0 7px,var(--silk-hi) 7px 14px)}
+.ev.rare span{background:var(--silk);padding:0 3px;border-radius:2px}
+.legend{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:22px;font-size:.88rem;color:var(--muted)}
+.legend i{display:inline-block;width:22px;height:12px;border-radius:2px;margin-right:9px;vertical-align:-1px;background:var(--silk)}
+.legend i.r{background:repeating-linear-gradient(135deg,var(--silk) 0 4px,var(--silk-hi) 4px 8px)}
+.tt-list{display:none;flex-direction:column;border-top:2px solid var(--ink)}
+.ttl-day{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;padding-block:16px;border-bottom:1px solid var(--line)}
+.ttl-day>b{font-weight:600}
+.ttl-day>div{display:flex;flex-direction:column;gap:10px}
+.ttl-day a{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px;text-decoration:none;align-items:baseline}
+.ttl-day a time{font-weight:600;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:8px}
+.ttl-day a time::before{content:"";flex:none;width:8px;height:8px;border-radius:2px;background:var(--silk)}
+.ttl-day a.rare time::before{background:repeating-linear-gradient(135deg,var(--silk) 0 2px,var(--silk-hi) 2px 4px)}
+@media (max-width:720px){.tt-scroll{display:none}.tt-list{display:flex}}
+@media (max-width:380px){.ttl-day{grid-template-columns:1fr;gap:8px}}
+
+/* ───────── masters ───────── */
+.masters{background:var(--sky)}
+.credits{border-top:2px solid var(--ink)}
+.credit{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto;gap:8px 32px;align-items:baseline;padding-block:22px;border-bottom:1px solid var(--line)}
+.credit b{font:400 clamp(1.25rem,2.4vw,1.75rem)/1.1 var(--f-display);text-transform:uppercase}
+.credit p{color:var(--muted)}
+.credit a{font-weight:600;text-decoration:none;font-variant-numeric:tabular-nums;white-space:nowrap}
+.credit a:hover{color:var(--silk)}
+@media (max-width:760px){.credit{grid-template-columns:1fr}}
+
+/* ───────── contacts ───────── */
+.contacts{background:var(--silk);color:var(--on-silk);padding-block:88px 40px}
+.contacts .kicker{color:var(--on-silk)}
+.contacts .kicker::before{background:var(--on-silk)}
+.phone{display:block;font:400 clamp(2.2rem,8.4vw,7.2rem)/.95 var(--f-display);text-decoration:none;margin:22px 0 30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.c-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px 48px;align-items:end}
+.c-grid address{font-style:normal;font-size:clamp(1.2rem,2.2vw,1.6rem);line-height:1.3;font-weight:500}
+.c-grid address span{display:block;font-size:1rem;font-weight:400;margin-top:8px;max-width:44ch;opacity:.8}
+.links{display:flex;flex-wrap:wrap;gap:10px}
+.links a{padding:12px 20px;border:1.5px solid var(--on-silk);border-radius:999px;text-decoration:none;font-weight:600;transition:background .2s,color .2s}
+.links a:hover{background:var(--on-silk);color:var(--silk)}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:80px;padding-top:20px;border-top:1px solid color-mix(in srgb,var(--on-silk) 30%,transparent);font-size:.85rem;opacity:.85}
+@media (max-width:760px){.c-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+
+<header class="hero" id="top">
+  <canvas id="silk" aria-hidden="true"></canvas>
+  <div class="wrap hero-top">
+    <a class="logo" href="#top">UP Space</a>
+    <nav aria-label="Разделы">
+      <a href="#about">О студии</a>
+      <a href="#practices">Направления</a>
+      <a href="#week">Расписание</a>
+      <a href="#masters">Мастера</a>
+      <a href="#contacts">Контакты</a>
+    </nav>
+    <a class="tel" href="tel:+79995178729">+7 999 517-87-29</a>
+  </div>
+  <div class="wrap hero-mid">
+    <div class="col">
+      <p class="lede">Альфагравити, массаж, йога и&nbsp;телесные практики <span>в&nbsp;маленькой студии на&nbsp;Загородном</span></p>
+      <div class="actions">
+        <a class="cta" href="#practices">Выбрать занятие <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+        <a class="ghost-link" href="https://t.me/up_space" target="_blank" rel="noopener">Написать в Telegram</a>
+      </div>
+      <div class="meta-row">
+      <div class="stats">
+        <div><b>7</b><span>направлений</span></div>
+        <div><b>5</b><span>мастеров</span></div>
+        <div><b>1:1</b><span>индивидуально</span></div>
+      </div>
+      <div class="today" id="today">
+        <span class="lbl"><i></i><span id="today-lbl">Сегодня в студии</span></span>
+        <ul id="today-list"></ul>
+      </div>
+      </div>
+    </div>
+    <span class="hint"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 12h12M16 8l4 4-4 4M4 6v12"/></svg><span class="m">Потяните полотна курсором</span><span class="t">Проведите по полотнам пальцем</span></span>
+  </div>
+  <div class="wrap floor"><div class="fit"><span id="big">Летать</span></div></div>
+</header>
+
+<section class="manifest" id="about">
+  <div class="wrap">
+    <p class="kicker">О студии</p>
+    <p class="big">В UP Space <s>нет ресепшена</s> и <s>единого прайса</s>. Каждый мастер <mark>сам собирает группу</mark>, сам назначает цену и сам отвечает вам по телефону.</p>
+    <div class="pluses">
+      <div><b>Время под вас</b><p>Расписание складывается под группу, а не наоборот.</p></div>
+      <div><b>Мастер рядом</b><p>Без посредников он лучше понимает, с чем вы пришли.</p></div>
+      <div><b>Честная цена</b><p>Стоимость назначает преподаватель и может предложить особые условия.</p></div>
+      <div><b>Небольшие группы</b><p>Люди знают друг друга по именам и поддерживают.</p></div>
+      <div><b>Живые форматы</b><p>Мастера пробуют новое, и встречи не повторяются.</p></div>
+      <div><b>Только по записи</b><p>На каждое занятие записывайтесь заранее у ведущего.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="practices" id="practices">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Направления</h2>
+      <p>Нажмите на строку, чтобы увидеть описание, цены и телефон ведущего.</p>
+    </div>
+    <div class="index">
+
+      <details class="row" id="alphagravity" open>
+        <summary><h3>Альфагравити</h3><span class="meta"><span class="when">Индивидуально и в паре</span><span class="price">от 2 700 ₽</span></span><span class="plus" aria-hidden="true"></span></summary>
+        <div class="body">
+          <div class="desc">
+            <p>Тренировки на подвесных гамаках. В них соединились йога, пилатес, стретчинг и силовая нагрузка. Программу собираем под ваш уровень и здоровье.</p>
+            <ul>
+              <li>Укрепляет мышцы и возвращает гибкость, суставы и спина лучше защищены от травм</li>
+              <li>Выравнивает осанку: мышцы спины и пресса учатся держать тело</li>
+              <li>Снимает стресс и поднимает настроение</li>
+              <li>Тренирует сердце и улучшает кровообращение</li>
+            </ul>
+          </div>
+          <div class="facts">
+            <dl>
+              <div><dt>Когда</dt><dd>Время подбираем индивидуально</dd></div>
+              <div><dt>Стоимость</dt><dd><table class="prices"><tr><td>Разовая тренировка</td><td>2 700 ₽</td></tr><tr><td>Абонемент на 4 занятия</td><td>9 200 ₽</td></tr></table><p class="small">Абонемент действует месяц с даты активации</p></dd></div>
+              <div><dt>Ведёт</dt><dd>Екатерина Фокина, инструктор альфагравити и йоги</dd></div>
+            </dl>
+            <div class="call"><span class="small">Запись</span><a href="tel:+79995178729">+7 999 517-87-29</a></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="row" id="massage">
+        <summary><h3>Массаж</h3><span class="meta"><span class="when">Индивидуально</span><span class="price">от 3 500 ₽</span></span><span class="plus" aria-hidden="true"></span></summary>
+        <div class="body">
+          <div class="desc">
+            <p>Массаж учит слышать своё тело. Прикосновение к мышцам подаёт мозгу сигнал расслабиться, и с каждым сеансом нервной системе проще находить это состояние самой.</p>
+            <p>Можно прийти просто почувствовать тело, а можно с напряжением или болью в мышцах. Задача сеанса: расслабить, снять зажимы и вернуть лёгкость.</p>
+            <p class="small">Массажист не ставит диагнозы и не назначает лечение. Это работа врача.</p>
+          </div>
+          <div class="facts">
+            <dl>
+              <div><dt>Когда</dt><dd>Время подбираем индивидуально</dd></div>
+              <div><dt>Стоимость</dt><dd><table class="prices">
+                <tr><td>1 час</td><td>3 500 ₽</td></tr>
+                <tr><td>1,5 часа</td><td>5 000 ₽</td></tr>
+                <tr><td>4 сеанса по 1 часу</td><td>12 600 ₽</td></tr>
+                <tr><td>4 сеанса по 1,5 часа</td><td>18 000 ₽</td></tr>
+                <tr><td>4 сеанса по 2 часа</td><td>22 800 ₽</td></tr>
+              </table><p class="small">Абонементы действуют месяц с даты активации</p></dd></div>
+              <div><dt>Ведёт</dt><dd>Екатерина Фокина, массажист</dd></div>
+            </dl>
+            <div class="call"><span class="small">Запись</span><a href="tel:+79995178729">+7 999 517-87-29</a></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="row" id="yoga">
+        <summary><h3>Йога-терапия</h3><span class="meta"><span class="when">Вторник, 19:30</span><span class="price">цена у ведущей</span></span><span class="plus" aria-hidden="true"></span></summary>
+        <div class="body">
+          <div class="desc">
+            <p>Йога как способ восстановиться. Мягко возвращает гибкость, укрепляет мышцы, выравнивает осанку и дыхание, снижает боль и тревожность. Подходит в любом возрасте и с любым уровнем подготовки.</p>
+            <p class="small">При хронических заболеваниях или травмах посоветуйтесь с инструктором или врачом до начала занятий.</p>
+          </div>
+          <div class="facts">
+            <dl>
+              <div><dt>Когда</dt><dd>Вторник, 19:30–21:30</dd></div>
+              <div><dt>Стоимость</dt><dd>Разовое занятие и абонемент на 4 занятия, цену уточняйте у ведущей</dd></div>
+              <div><dt>Ведёт</dt><dd>Александра Чистополова, инструктор йоги</dd></div>
+            </dl>
+            <div class="call"><span class="small">Запись</span><a href="tel:+79110298975">+7 911 029-89-75</a></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="row" id="stretching">
+        <summary><h3>Растяжка</h3><span class="meta"><span class="when">Среда и суббота</span><span class="price">от 1 000 ₽</span></span><span class="plus" aria-hidden="true"></span></summary>
+        <div class="body">
+          <div class="desc">
+            <p>Активный стретчинг, суставная гимнастика, МФР и упражнения для здоровой спины в одной тренировке. Развиваем гибкость, подвижность суставов и пластику, работаем над шпагатом. Полезно и девушкам, и мужчинам.</p>
+          </div>
+          <div class="facts">
+            <dl>
+              <div><dt>Когда</dt><dd>Среда, 13:00 и 20:15<br>Суббота, 12:00 и 13:00</dd></div>
+              <div><dt>Стоимость</dt><dd><table class="prices"><tr><td>Разовая тренировка</td><td>1 000 ₽</td></tr><tr><td>Абонемент на 4 занятия</td><td>3 700 ₽</td></tr></table><p class="small">Абонемент действует месяц с даты активации</p></dd></div>
+              <div><dt>Ведёт</dt><dd>Алина Паутова, тренер по здоровой растяжке и фитнесу</dd></div>
+            </dl>
+            <div class="call"><span class="small">Запись</span><a href="tel:+79812539815">+7 981 253-98-15</a></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="row" id="goddess">
+        <summary><h3>Пробуждение богини</h3><span class="meta"><span class="when">2 субботы в месяц</span><span class="price">донейшн</span></span><span class="plus" aria-hidden="true"></span></summary>
+        <div class="body">
+          <div class="desc">
+            <p>Активная медитация в тёплом женском кругу, 9 стадий за одну встречу. Время побыть с собой и услышать, чего хочет тело.</p>
+            <ul>
+              <li>«Разморозить» тело и чувства, снять напряжение</li>
+              <li>Отпустить накопившиеся эмоции и набраться сил</li>
+              <li>Лучше чувствовать тело и мышцы тазового дна</li>
+              <li>Найти внутреннюю опору и больше радости в жизни</li>
+            </ul>
+          </div>
+          <div class="facts">
+            <dl>
+              <div><dt>Когда</dt><dd>Суббота, 09:30–11:30<br><span class="small">2 субботы в месяце, даты уточняйте</span></dd></div>
+              <div><dt>Стоимость</dt><dd>Донейшн: сколько считаете нужным</dd></div>
+              <div><dt>Ведёт</dt><dd>Нина SunnyEnergy</dd></div>
+            </dl>
+            <div class="call"><span class="small">Запись</span><a href="tel:+79650828635">+7 965 082-86-35</a></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="row" id="voice">
+        <summary><h3>Телесно-голосовая группа</h3><span class="meta"><span class="when">2 субботы в месяц</span><span class="price">1 800 ₽</span></span><span class="plus" aria-hidden="true"></span></summary>
+        <div class="body">
+          <div class="desc">
+            <p>Практика, где вместе работают тело и голос. О программе встречи подробно расскажет ведущая при записи.</p>
+          </div>
+          <div class="facts">
+            <dl>
+              <div><dt>Когда</dt><dd>Суббота, 09:30–11:30<br><span class="small">2 субботы в месяце, даты уточняйте</span></dd></div>
+              <div><dt>Стоимость</dt><dd><table class="prices"><tr><td>Встреча</td><td>1 800 ₽</td></tr></table></dd></div>
+              <div><dt>Ведёт</dt><dd>Тэя</dd></div>
+            </dl>
+            <div class="call"><span class="small">Запись</span><a href="tel:+79215600717">+7 921 560-07-17</a></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="row" id="dance">
+        <summary><h3>Танцевальные медитации</h3><span class="meta"><span class="when">Пятница, 19:00</span><span class="price">по запросу</span></span><span class="plus" aria-hidden="true"></span></summary>
+        <div class="body">
+          <div class="desc">
+            <p>Пятничный вечер в свободном движении под музыку. Три часа, чтобы выдохнуть после недели и вернуться в тело.</p>
+          </div>
+          <div class="facts">
+            <dl>
+              <div><dt>Когда</dt><dd>Пятница, 19:00–22:00</dd></div>
+              <div><dt>Стоимость и запись</dt><dd>Уточняйте по телефону студии</dd></div>
+            </dl>
+            <div class="call"><span class="small">Телефон студии</span><a href="tel:+79995178729">+7 999 517-87-29</a></div>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<section class="week-sec" id="week">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Неделя</h2>
+      <p>Групповые занятия по дням и часам. Альфагравити и массаж проходят в любой день по договорённости с мастером.</p>
+    </div>
+    <div class="tt-scroll">
+      <div class="tt" id="tt"></div>
+    </div>
+    <div class="tt-list" id="ttl"></div>
+    <div class="legend">
+      <span><i></i>Каждую неделю</span>
+      <span><i class="r"></i>Две субботы в месяц, даты у ведущей</span>
+    </div>
+  </div>
+</section>
+
+<section class="masters" id="masters">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Мастера</h2>
+      <p>Записывайтесь напрямую: мастер ответит на вопросы и подберёт время.</p>
+    </div>
+    <div class="credits">
+      <div class="credit"><b>Екатерина Фокина</b><p>Альфагравити и массаж. Инструктор йоги, фитнес-тренер</p><a href="tel:+79995178729">+7 999 517-87-29</a></div>
+      <div class="credit"><b>Александра Чистополова</b><p>Йога-терапия</p><a href="tel:+79110298975">+7 911 029-89-75</a></div>
+      <div class="credit"><b>Алина Паутова</b><p>Растяжка, здоровая спина, фитнес</p><a href="tel:+79812539815">+7 981 253-98-15</a></div>
+      <div class="credit"><b>Нина SunnyEnergy</b><p>Активная медитация «Пробуждение богини»</p><a href="tel:+79650828635">+7 965 082-86-35</a></div>
+      <div class="credit"><b>Тэя</b><p>Телесно-голосовая группа</p><a href="tel:+79215600717">+7 921 560-07-17</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="contacts" id="contacts">
+  <div class="wrap">
+    <p class="kicker">Записаться и приехать</p>
+    <a class="phone" href="tel:+79995178729">+7 999 517-87-29</a>
+    <div class="c-grid">
+      <address>Санкт-Петербург, Загородный проспект, 37/70<span>Перед первым визитом позвоните или напишите мастеру: он встретит и подскажет, как пройти.</span></address>
+      <div class="links">
+        <a href="https://yandex.ru/maps/org/ap_speys/3742039427/" target="_blank" rel="noopener">Яндекс Карты</a>
+        <a href="https://t.me/up_space" target="_blank" rel="noopener">Telegram</a>
+        <a href="https://vk.com/up_spb" target="_blank" rel="noopener">ВКонтакте</a>
+      </div>
+    </div>
+    <div class="foot"><span>© 2026 UP Space</span><span>Студия альфагравити, массажа и телесных практик</span></div>
+  </div>
+</section>
+
+<script>
+/* ── one schedule feeds the timetable, the phone list and the "today" card ── */
+var DAYS=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+var EV={
+  1:[{s:19.5,e:21.5,t:'Йога-терапия',l:'19:30–21:30',h:'#yoga'}],
+  2:[{s:13,e:14,t:'Растяжка',l:'13:00',h:'#stretching'},{s:20.25,e:21.25,t:'Растяжка',l:'20:15',h:'#stretching'}],
+  4:[{s:19,e:22,t:'Танцевальные медитации',l:'19:00–22:00',h:'#dance'}],
+  5:[{s:9.5,e:11.5,t:'Пробуждение богини / голосовая группа',ts:'Богиня / голос',l:'09:30–11:30',h:'#goddess',r:1},{s:12,e:13,t:'Растяжка',l:'12:00',h:'#stretching'},{s:13,e:14,t:'Растяжка',l:'13:00',h:'#stretching'}]
+};
+function openRow(a){var d=document.querySelector(a.getAttribute('href'));if(d&&d.tagName==='DETAILS')d.open=true}
+
+(function(){
+  var START=9, END=22;
+  var tt=document.getElementById('tt'), html='<div class="hd"></div>';
+  DAYS.forEach(function(d,i){html+='<div class="hd'+(EV[i]?'':' off')+'">'+d.slice(0,2)+'</div>'});
+  html+='<div class="hours">';
+  for(var h=START;h<=END;h++){html+='<span style="top:calc(var(--h)*'+(h-START)+')">'+(h<10?'0':'')+h+':00</span>'}
+  html+='</div>';
+  DAYS.forEach(function(d,i){
+    html+='<div class="col">';
+    (EV[i]||[]).forEach(function(x){
+      html+='<a class="ev'+(x.r?' rare':'')+'" href="'+x.h+'" style="top:calc(var(--h)*'+(x.s-START)+' + 2px);height:calc(var(--h)*'+(x.e-x.s)+' - 4px)"><b>'+x.l+'</b><span>'+(x.ts||x.t)+'</span></a>';
+    });
+    html+='</div>';
+  });
+  tt.innerHTML=html;
+
+  var list='';
+  DAYS.forEach(function(d,i){
+    if(!EV[i])return;
+    list+='<div class="ttl-day"><b>'+d+'</b><div>';
+    EV[i].forEach(function(x){list+='<a class="'+(x.r?'rare':'')+'" href="'+x.h+'"><time>'+x.l+'</time><span>'+x.t+'</span></a>'});
+    list+='</div></div>';
+  });
+  document.getElementById('ttl').innerHTML=list;
+
+  /* today, in St Petersburg time (UTC+3) */
+  var now=new Date(Date.now()+3*3600e3), day=(now.getUTCDay()+6)%7, hr=now.getUTCHours()+now.getUTCMinutes()/60;
+  var lbl=document.getElementById('today-lbl'), ul=document.getElementById('today-list'), items=[], title;
+  var todays=(EV[day]||[]).filter(function(x){return x.e>hr});
+  if(todays.length){
+    title='Сегодня, '+DAYS[day].toLowerCase();
+    var nextSet=false;
+    (EV[day]||[]).forEach(function(x){
+      var cls=x.e<=hr?'past':(!nextSet?(nextSet=true,'next'):'');
+      items.push('<li class="'+cls+'"><a href="'+x.h+'"><b>'+x.l.slice(0,5)+'</b><span>'+(x.ts||x.t)+'</span></a></li>');
+    });
+  }else{
+    var k=1; while(!EV[(day+k)%7])k++;
+    var nd=(day+k)%7;
+    title=(k===1?'Завтра, ':'Ближайшие группы: ')+DAYS[nd].toLowerCase();
+    EV[nd].forEach(function(x,j){items.push('<li class="'+(j===0?'next':'')+'"><a href="'+x.h+'"><b>'+x.l.slice(0,5)+'</b><span>'+(x.ts||x.t)+'</span></a></li>')});
+  }
+  lbl.textContent=title;
+  ul.innerHTML=items.join('');
+
+  document.querySelectorAll('.ev, .ttl-day a, .today a').forEach(function(a){a.addEventListener('click',function(){openRow(a)})});
+})();
+
+/* ── headline fitted to the width of the floor ── */
+(function(){
+  var big=document.getElementById('big'), box=big.parentElement;
+  function fit(){big.style.fontSize='100px';var w=big.getBoundingClientRect().width;if(w)big.style.fontSize=(100*box.clientWidth/w)+'px'}
+  fit(); if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+  window.addEventListener('resize',fit);
+})();
+
+/* ── hanging silks: verlet ropes that react to mouse, finger, taps and scrolling ── */
+(function(){
+  var hero=document.querySelector('.hero'), cv=document.getElementById('silk'), ctx=cv.getContext('2d');
+  var mid=document.querySelector('.hero-mid');
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var TOP=0,W=0,H=0,ropes=[],colors={},t=0,running=false,visible=true,kick=0;
+  var ptr={x:-999,y:-999,vx:0,vy:0,on:false,r2:5200};
+
+  function readColors(){var s=getComputedStyle(document.documentElement);
+    colors={front:s.getPropertyValue('--silk').trim(),back:s.getPropertyValue('--silk-back').trim(),hi:s.getPropertyValue('--silk-hi').trim(),rail:s.getPropertyValue('--ink').trim()}}
+
+  function tail(x,len,w,phase,dir){
+    [-1,1].forEach(function(side){
+      var n=26, L=len*(side<0?1:.95), seg=L/n, ax=x+side*7*w, pts=[];
+      for(var i=0;i<=n;i++){var px=ax+side*i*1.2;pts.push({x:px,y:i*seg+TOP,px:px,py:i*seg+TOP})}
+      ropes.push({pts:pts,seg:seg,ax:ax,bx:null,w:w,phase:phase+(side>0?.5:0),front:side>0,loop:false,dir:dir});
+    });
+  }
+  function loop(x,depth,gap,w,phase,dir){
+    var n=34, L=depth*2.15, seg=L/n, ax=x-gap/2, bx=x+gap/2, pts=[];
+    for(var i=0;i<=n;i++){var f=i/n, px=ax+gap*f, py=Math.sin(Math.PI*f)*depth+TOP;pts.push({x:px,y:py,px:px,py:py})}
+    ropes.push({pts:pts,seg:seg,ax:ax,bx:bx,w:w,phase:phase,front:true,loop:true,dir:dir});
+    /* the second layer of the hammock, slightly shorter, sits behind */
+    var pts2=[], L2=L*.97, seg2=L2/n;
+    for(var j=0;j<=n;j++){var f2=j/n, qx=ax+4+(gap-8)*f2, qy=Math.sin(Math.PI*f2)*depth*.97+TOP;pts2.push({x:qx,y:qy,px:qx,py:qy})}
+    ropes.push({pts:pts2,seg:seg2,ax:ax+4,bx:bx-4,w:w*.9,phase:phase+.8,front:false,loop:true,dir:-dir});
+  }
+
+  function build(){
+    var r=cv.getBoundingClientRect(); W=r.width; H=r.height;
+    var dpr=Math.min(2,window.devicePixelRatio||1);
+    cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+    var m=mid.getBoundingClientRect(), cs=getComputedStyle(mid);
+    TOP=Math.round(document.querySelector('.hero-top').getBoundingClientRect().bottom-r.top);
+    var cl=m.left-r.left+parseFloat(cs.paddingLeft), cw=m.width-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+    ropes=[];
+    if(W<560){
+      loop(cl+cw*.86,H*.40,32,.8,0,1);
+    }else if(W<1000){
+      loop(cl+cw*.74,H*.48,48,1,0,1);
+      tail(cl+cw*.92,H*.92,.9,2.2,-1);
+    }else{
+      loop(cl+cw*.72,H*.52,60,1.2,0,1);
+      tail(cl+cw*.88,H*.96,1.1,2.3,-1);
+    }
+    for(var i=0;i<160;i++)step(true);
+  }
+
+  function step(quiet){
+    t+=1;
+    var k=quiet?0:kick; kick*=.5;
+    ropes.forEach(function(r){
+      var p=r.pts,n=p.length-1;
+      for(var i=1;i<=n;i++){
+        if(r.loop&&i===n)continue;
+        var q=p[i], vx=(q.x-q.px)*.985, vy=(q.y-q.py)*.985;
+        q.px=q.x; q.py=q.y;
+        var f=r.loop?Math.sin(Math.PI*i/n):i/n;
+        var wind=(quiet||reduce)?0:(Math.sin(t*.011+r.phase+i*.17)*.03+Math.sin(t*.0035+r.phase)*.024)*f;
+        q.x+=vx+wind+k*.045*f*r.dir; q.y+=vy+.32-Math.abs(k)*.01*f;
+        if(ptr.on){var dx=q.x-ptr.x, dy=q.y-ptr.y, d2=dx*dx+dy*dy;
+          if(d2<ptr.r2){var s=(1-d2/ptr.r2)*.34; q.x+=ptr.vx*s; q.y+=ptr.vy*s*.4}}
+      }
+      for(var it=0;it<10;it++){
+        p[0].x=r.ax; p[0].y=TOP;
+        if(r.loop){p[n].x=r.bx; p[n].y=TOP}
+        for(var j=0;j<n;j++){
+          var a=p[j], b=p[j+1], ddx=b.x-a.x, ddy=b.y-a.y, dist=Math.sqrt(ddx*ddx+ddy*ddy)||.001, diff=(dist-r.seg)/dist;
+          var aFix=(j===0), bFix=(r.loop&&j+1===n);
+          if(aFix&&bFix)continue;
+          if(aFix){b.x-=ddx*diff; b.y-=ddy*diff}
+          else if(bFix){a.x+=ddx*diff; a.y+=ddy*diff}
+          else{a.x+=ddx*diff*.5; a.y+=ddy*diff*.5; b.x-=ddx*diff*.5; b.y-=ddy*diff*.5}
+        }
+      }
+    });
+    ptr.vx*=.55; ptr.vy*=.55;
+  }
+
+  function pluck(x,y){
+    ropes.forEach(function(r){r.pts.forEach(function(q,i){
+      if(i===0)return; var dx=q.x-x, dy=q.y-y, d=Math.sqrt(dx*dx+dy*dy);
+      if(d<120){var s=(1-d/120)*9; q.px-=(dx>=0?1:-1)*s}
+    })});
+  }
+
+  function width(r,i,n){
+    var f=i/n;
+    if(r.loop){var m=Math.sin(Math.PI*f);return (3+Math.pow(m,2.2)*26)*r.w}
+    return (3+Math.pow(f,1.2)*24)*r.w;
+  }
+  function edges(r){
+    var p=r.pts,n=p.length-1, L=[], R=[];
+    for(var i=0;i<=n;i++){
+      var a=p[Math.max(0,i-1)], b=p[Math.min(n,i+1)], tx=b.x-a.x, ty=b.y-a.y, m=Math.sqrt(tx*tx+ty*ty)||1;
+      var nx=-ty/m, ny=tx/m, w=width(r,i,n);
+      var twist=Math.sin(i/n*5.5+r.phase+t*.004)*.32+.68;
+      L.push([p[i].x+nx*w*twist,p[i].y+ny*w*twist]); R.push([p[i].x-nx*w,p[i].y-ny*w]);
+    }
+    return {L:L,R:R};
+  }
+  function trace(pts,move){
+    if(move)ctx.moveTo(pts[0][0],pts[0][1]); else ctx.lineTo(pts[0][0],pts[0][1]);
+    for(var i=1;i<pts.length-1;i++){var mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;ctx.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}
+    var e=pts[pts.length-1]; ctx.lineTo(e[0],e[1]);
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle=colors.rail; ctx.globalAlpha=.35; ctx.fillRect(0,TOP-1,W,1.5); ctx.globalAlpha=1;
+    ropes.forEach(function(r){[r.ax,r.bx].forEach(function(x){ if(x==null)return; ctx.beginPath(); ctx.arc(x,TOP+1,3.2,0,6.283); ctx.strokeStyle=colors.rail; ctx.lineWidth=1.6; ctx.stroke(); })});
+    [false,true].forEach(function(front){
+      ropes.forEach(function(r){
+        if(r.front!==front)return;
+        var e=edges(r);
+        ctx.beginPath(); trace(e.L,true); trace(e.R.slice().reverse(),false); ctx.closePath();
+        ctx.fillStyle=front?colors.front:colors.back; ctx.fill();
+        ctx.beginPath(); trace(e.L,true); ctx.strokeStyle=colors.hi; ctx.globalAlpha=front?.6:.25; ctx.lineWidth=1.5; ctx.stroke();
+        ctx.globalAlpha=1;
+      });
+    });
+  }
+  function frame(){ if(!visible){running=false;return} step(false); draw(); requestAnimationFrame(frame) }
+  function start(){ if(!running){running=true;requestAnimationFrame(frame)} }
+
+  function local(cx,cy){var r=cv.getBoundingClientRect();return {x:cx-r.left,y:cy-r.top}}
+  function move(cx,cy,r2){var p=local(cx,cy);
+    if(ptr.on){ptr.vx=(p.x-ptr.x); ptr.vy=(p.y-ptr.y)} else {ptr.vx=0;ptr.vy=0}
+    ptr.x=p.x; ptr.y=p.y; ptr.on=true; ptr.r2=r2; start()}
+
+  /* mouse and pen */
+  hero.addEventListener('pointermove',function(e){if(e.pointerType!=='touch')move(e.clientX,e.clientY,5600)});
+  hero.addEventListener('pointerleave',function(e){if(e.pointerType!=='touch')ptr.on=false});
+  hero.addEventListener('pointerdown',function(e){if(e.pointerType!=='touch'){var p=local(e.clientX,e.clientY);pluck(p.x,p.y);start()}});
+  /* fingers: passive listeners, so the page still scrolls normally */
+  hero.addEventListener('touchstart',function(e){var tch=e.touches[0];if(!tch)return;ptr.on=false;move(tch.clientX,tch.clientY,13000);var p=local(tch.clientX,tch.clientY);pluck(p.x,p.y)},{passive:true});
+  hero.addEventListener('touchmove',function(e){var tch=e.touches[0];if(tch)move(tch.clientX,tch.clientY,13000)},{passive:true});
+  hero.addEventListener('touchend',function(){ptr.on=false},{passive:true});
+  hero.addEventListener('touchcancel',function(){ptr.on=false},{passive:true});
+  /* scrolling swings the silks like a moving ceiling */
+  var lastY=window.scrollY;
+  window.addEventListener('scroll',function(){var y=window.scrollY,d=y-lastY;lastY=y;if(!reduce){kick+=Math.max(-50,Math.min(50,d))}},{passive:true});
+
+  var mq=window.matchMedia('(prefers-color-scheme: dark)');
+  if(mq.addEventListener)mq.addEventListener('change',function(){readColors();draw()});
+  new MutationObserver(function(){readColors();draw()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  if('IntersectionObserver' in window){new IntersectionObserver(function(es){visible=es[0].isIntersecting; if(visible)start()}).observe(cv)}
+  var rt, lastW=0;
+  var lastH=0;
+  function rebuild(){ var b=cv.getBoundingClientRect(); if(lastW&&Math.abs(b.width-lastW)<2&&Math.abs(b.height-lastH)<2)return; lastW=b.width; lastH=b.height; build(); draw() }
+  window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(rebuild,120)});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){lastW=0;rebuild()});
+
+  readColors(); rebuild(); start();
+})();
+</script>
+
+</body>
+</html>

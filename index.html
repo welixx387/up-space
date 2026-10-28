@@ -54,8 +54,11 @@ html,body{overflow-x:clip}
 .hero-top{display:flex;align-items:center;gap:28px;padding-block:14px}
 .logo,.mark{display:block;aspect-ratio:720/591;max-width:100%;background:currentColor;color:var(--ink);
   -webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat}
-.logo{width:66px}
-@media (max-width:560px){.logo{width:54px}}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}
+.logo{width:58px}
+.brand-name{font:400 1.2rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap}
+@media (max-width:560px){.logo{width:46px}.brand{gap:10px}.brand-name{font-size:1rem}}
+@media (max-width:340px){.brand-name{display:none}}
 .hero-top nav{display:flex;gap:26px;margin-left:auto}
 .hero-top nav a,.hero-top .tel{text-decoration:none;font-size:.95rem}
 .hero-top nav a{color:var(--muted)}
@@ -260,7 +263,7 @@ section{padding-block:96px}
 <header class="hero" id="top">
   <canvas id="silk" aria-hidden="true"></canvas>
   <div class="wrap hero-top">
-    <a class="logo" href="#top" aria-label="Ап Спейс — наверх"></a>
+    <a class="brand" href="#top"><span class="logo" aria-hidden="true"></span><span class="brand-name">Ап Спейс</span></a>
     <nav aria-label="Разделы">
       <a href="#about">О студии</a>
       <a href="#practices">Направления</a>

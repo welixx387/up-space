@@ -4,341 +4,665 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Ап Спейс — редактор</title>
+<title>Ап Спейс — админка</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Onest:wght@400;500;600&display=swap">
 <style>
-/* Layout: login card → editor = slim toolbar over the live site in a frame */
+/* Layout: login card → app = sticky top bar + section tabs + one column of form cards; full-screen preview overlay */
 :root{
-  --bg:#E4EAF0; --panel:#FFFFFF; --ink:#12161D; --muted:#566170; --line:#CCD5DE;
-  --accent:#EE5B37; --on-accent:#1B0E09; --ok:#2F8A57; --err:#C2401F;
+  --bg:#EEF2F6; --panel:#FFFFFF; --ink:#12161D; --muted:#5B6676; --line:#D3DBE3; --field:#F7F9FB;
+  --accent:#EE5B37; --accent-soft:#FDE9E3; --on-accent:#1B0E09; --ok:#2F8A57; --err:#C2401F;
   --f-display:"Dela Gothic One","Arial Black",sans-serif;
   --f-body:"Onest","Segoe UI","Helvetica Neue",Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root{
-  --bg:#0B1119; --panel:#141C27; --ink:#E9EEF3; --muted:#91A0B0; --line:#25313F;
-  --accent:#F2683F; --on-accent:#1B0E09; --ok:#5BC48A; --err:#FF8A6B; color-scheme:dark}}
+  --bg:#0B1119; --panel:#141C27; --ink:#E9EEF3; --muted:#93A1B1; --line:#283444; --field:#0F1620;
+  --accent:#F2683F; --accent-soft:#3A1F17; --on-accent:#1B0E09; --ok:#5BC48A; --err:#FF8A6B; color-scheme:dark}}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0}
+html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
-button,input{font:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
 [hidden]{display:none!important}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.side{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
-/* login */
-.login{min-height:100%;display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
-.card{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:28px;display:flex;flex-direction:column;gap:16px}
-.card h1{margin:0;font:400 1.5rem/1.1 var(--f-display);text-transform:uppercase}
-.card p{margin:0;color:var(--muted)}
-.field{display:flex;flex-direction:column;gap:6px}
-.field label{font-size:.85rem;color:var(--muted)}
-.field input{padding:12px 14px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
-.field input:focus{border-color:var(--accent);outline:none}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:999px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--panel);font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;color:var(--ink)}
 .btn:hover{border-color:var(--ink)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.btn.primary:hover{filter:brightness(1.05)}
 .btn:disabled{opacity:.45;cursor:default}
+.btn.small{padding:6px 12px;font-size:.88rem}
+.icon{width:34px;height:34px;padding:0;border-radius:8px;border:1.5px solid var(--line);background:var(--panel);cursor:pointer;display:inline-grid;place-items:center;color:var(--ink)}
+.icon:hover{border-color:var(--ink)}
+.icon.danger:hover{border-color:var(--err);color:var(--err)}
+.icon:disabled{opacity:.35;cursor:default}
+.add{width:100%;padding:14px;border:1.5px dashed var(--line);border-radius:10px;background:none;cursor:pointer;font-weight:600;color:var(--muted)}
+.add:hover{border-color:var(--accent);color:var(--accent)}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding-block:24px}
+.card{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px;display:flex;flex-direction:column;gap:16px}
+.card h1{margin:0;font:400 1.5rem/1.1 var(--f-display);text-transform:uppercase}
+.card p{margin:0;color:var(--muted)}
 .err{color:var(--err);font-size:.9rem;min-height:1.3em}
 
-/* editor */
-.editor{height:100%;display:grid;grid-template-rows:auto auto 1fr}
-.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--panel);border-bottom:1px solid var(--line)}
-.bar .name{font:400 1rem/1 var(--f-display);text-transform:uppercase}
-.bar .name small{font:500 .8rem var(--f-body);text-transform:none;color:var(--muted);margin-left:8px}
+/* top bar + tabs */
+.top{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line)}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding-block:10px}
+.brand{font:400 1rem/1 var(--f-display);text-transform:uppercase;white-space:nowrap}
+.brand small{font:500 .8rem var(--f-body);text-transform:none;color:var(--muted);margin-left:6px}
 .status{font-size:.88rem;color:var(--muted);margin-right:auto;min-width:0}
-.status.ok{color:var(--ok)} .status.bad{color:var(--err)}
-.help{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:.85rem;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
-.help b{color:var(--ink);font-weight:600}
-.help .x{margin-left:auto;background:none;border:0;color:var(--muted);cursor:pointer;padding:2px 6px}
-iframe{width:100%;height:100%;border:0;display:block;background:var(--panel)}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:min(560px,calc(100% - 32px));padding:12px 18px;border-radius:8px;background:var(--ink);color:var(--panel);font-size:.92rem;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:5}
-@media (max-width:640px){.bar .name small{display:none}.status{order:5;flex-basis:100%}}
+.status.ok{color:var(--ok)} .status.bad{color:var(--err)} .status.dirty{color:var(--accent)}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:0}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:10px 14px;border:0;border-bottom:3px solid transparent;background:none;cursor:pointer;font-weight:600;color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .n{font-weight:500;color:var(--muted);margin-left:4px}
+.foot{display:none;max-width:900px;margin:-90px auto 0;padding-block:0 60px;gap:10px;flex-wrap:wrap}
+@media (max-width:640px){.brand small{display:none}.status{order:9;flex-basis:100%;font-size:.8rem}.bar{gap:6px 8px;padding-block:8px}.bar .btn{padding:7px 12px;font-size:.9rem}.bar .aux{display:none}.foot{display:flex}.brand{font-size:.9rem;margin-right:auto}.tab{padding:8px 11px}}
+
+/* panels */
+main.app{max-width:900px;margin:0 auto;padding-block:24px 120px;display:flex;flex-direction:column;gap:18px}
+.panel-head h2{margin:0 0 4px;font:400 1.4rem/1.1 var(--f-display);text-transform:uppercase}
+.panel-head p{margin:0;color:var(--muted)}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.box h3{margin:0;font-size:1.02rem}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid .wide{grid-column:1/-1}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>span{font-size:.85rem;font-weight:600}
+.field small{color:var(--muted);font-size:.8rem}
+.field input,.field select,.field textarea,.mini{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--field)}
+.field textarea{resize:vertical;min-height:84px;line-height:1.45}
+.field input:focus,.field select:focus,.field textarea:focus,.mini:focus{border-color:var(--accent);outline:none}
+.invalid{border-color:var(--err)!important;background:color-mix(in srgb,var(--err) 8%,var(--field))!important}
+
+/* list items */
+.item{border:1px solid var(--line);border-radius:12px;background:var(--panel);min-width:0}
+.item-head{display:flex;align-items:center;gap:8px;padding:12px 14px}
+.item-head .title{flex:1;min-width:0;font-weight:600;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:0;text-align:left;padding:4px 0}
+.item-head .title small{font-weight:400;color:var(--muted);margin-left:6px}
+.item-body{padding:4px 14px 16px;display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--line)}
+.chev{transition:transform .2s}
+.item.open .chev{transform:rotate(90deg)}
+
+/* prices table */
+.rows{display:flex;flex-direction:column;gap:8px}
+.row-line{display:grid;grid-template-columns:minmax(0,1fr) 140px 34px;gap:8px;align-items:center}
+@media (max-width:480px){.row-line{grid-template-columns:minmax(0,1fr) 100px 34px}}
+
+/* photo */
+.photo{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.thumb{width:110px;aspect-ratio:4/5;border-radius:8px;background:var(--accent-soft);display:grid;place-items:center;overflow:hidden;flex:none;color:var(--accent);font:400 1.6rem var(--f-display)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.photo .acts{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+
+/* schedule */
+.day{display:flex;flex-direction:column;gap:10px}
+.day-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.day-head h3 small{font-weight:400;color:var(--muted);margin-left:6px}
+.cls{display:grid;grid-template-columns:90px 90px minmax(0,1fr) minmax(0,190px) 34px;gap:8px;align-items:end;padding:10px;border-radius:10px;background:var(--field);border:1px solid var(--line)}
+.cls .field>span{font-size:.75rem;font-weight:500;color:var(--muted)}
+.cls .opts{grid-column:3 / span 2;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.cls .del{grid-row:1;grid-column:5}
+.check{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.empty-day{color:var(--muted);font-size:.9rem;margin:0}
+@media (max-width:700px){
+  .cls{grid-template-columns:1fr 1fr 34px}
+  .cls .f-title,.cls .f-link,.cls .opts{grid-column:1 / -1}
+  .cls .del{grid-row:1;grid-column:3}
+}
+
+.hint{font-size:.85rem;color:var(--muted);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.hint code{font-family:inherit;font-weight:600;color:var(--ink)}
+
+/* preview */
+.preview{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;grid-template-rows:auto 1fr}
+.preview .bar{background:var(--panel);border-bottom:1px solid var(--line)}
+.pv-wrap{overflow:auto;display:flex;justify-content:center;padding:12px}
+.pv-wrap iframe{border:1px solid var(--line);border-radius:10px;background:#fff;width:100%;height:100%;min-height:600px}
+.pv-wrap.phone iframe{width:390px;max-width:100%}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:none;padding:7px 14px;cursor:pointer;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:min(560px,calc(100% - 32px));padding:12px 18px;border-radius:10px;background:var(--ink);color:var(--panel);font-size:.92rem;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:60}
 </style>
 </head>
 <body>
 
-<main class="login" id="login">
-  <form class="card" id="loginForm" autocomplete="on">
+<div class="login side" id="login">
+  <form class="card" id="loginForm">
     <h1>Ап Спейс</h1>
-    <p>Редактор сайта. Введите пароль, чтобы менять тексты и фото.</p>
-    <div class="field">
-      <label for="pwd">Пароль</label>
-      <input id="pwd" type="password" autocomplete="current-password" required>
-    </div>
+    <p>Админка сайта. Введите пароль.</p>
+    <label class="field"><span>Пароль</span><input id="pwd" type="password" autocomplete="current-password" required></label>
     <button class="btn primary" id="loginBtn" type="submit">Войти</button>
     <div class="err" id="loginErr" role="alert"></div>
   </form>
-</main>
+</div>
 
-<div class="editor" id="editor" hidden>
-  <div class="bar">
-    <span class="name">Ап Спейс<small>редактор</small></span>
-    <span class="status" id="status">Загружаю сайт…</span>
-    <a class="btn" href="/" target="_blank" rel="noopener">Открыть сайт</a>
-    <button class="btn" id="resetBtn" type="button" disabled>Отменить</button>
-    <button class="btn primary" id="saveBtn" type="button" disabled>Сохранить</button>
-    <button class="btn" id="logoutBtn" type="button">Выйти</button>
+<div id="app" hidden>
+  <header class="top">
+    <div class="bar side">
+      <span class="brand">Ап Спейс<small>админка</small></span>
+      <span class="status" id="status"></span>
+      <button class="btn" id="previewBtn" type="button">Предпросмотр</button>
+      <button class="btn primary" id="saveBtn" type="button" disabled>Сохранить</button>
+      <a class="btn aux" href="/" target="_blank" rel="noopener">Сайт ↗</a>
+      <button class="btn aux" id="logoutBtn" type="button">Выйти</button>
+    </div>
+    <nav class="tabs side" id="tabs" role="tablist"></nav>
+  </header>
+  <main class="app side" id="panel"></main>
+  <footer class="foot side"><a class="btn" href="/" target="_blank" rel="noopener">Открыть сайт ↗</a><button class="btn" id="logoutBtn2" type="button">Выйти из админки</button></footer>
+</div>
+
+<div class="preview" id="preview" hidden>
+  <div class="bar side">
+    <span class="brand">Предпросмотр<small>так сайт будет выглядеть после сохранения</small></span>
+    <span class="status"></span>
+    <span class="seg" role="group" aria-label="Ширина"><button type="button" id="pvDesk" aria-pressed="true">Компьютер</button><button type="button" id="pvPhone" aria-pressed="false">Телефон</button></span>
+    <button class="btn" id="pvClose" type="button">Закрыть</button>
   </div>
-  <div class="help" id="help">
-    <span><b>Текст:</b> нажмите и печатайте</span>
-    <span><b>Новая строка:</b> Shift + Enter</span>
-    <span><b>Фото:</b> нажмите на фото и выберите файл</span>
-    <span><b>Код двери:</b> нажмите на цифры кода</span>
-    <button class="x" id="helpClose" type="button" aria-label="Скрыть подсказку">✕</button>
-  </div>
-  <iframe id="site" title="Сайт в режиме редактирования"></iframe>
+  <div class="pv-wrap" id="pvWrap"><iframe id="pvFrame" title="Предпросмотр сайта"></iframe></div>
 </div>
 
 <input type="file" id="file" accept="image/jpeg,image/png,image/webp" hidden>
-<div class="toast" id="toast" hidden></div>
+<div class="toast" id="toast" hidden role="status"></div>
 
+<script src="/render.js"></script>
 <script>
 (function(){
+  'use strict';
   var $ = function(id){ return document.getElementById(id); };
-  var password = '';
-  var saved = {};           // content from the server
-  var dirtyText = {};       // key -> true
-  var pendingImages = {};   // key -> {data, type, url}
-  var pendingCode = null;
-  var doc = null;           // iframe document
-  var imgTarget = null;
+  var DAYS = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+  var password = '', data = null, base = null, orig = '', template = '';
+  var uploads = {};           // id -> {type, data(base64), url}
+  var open = {};              // expanded list items
+  var tab = 'home';
+  var saving = false;
 
-  function store(k, v){ try{ v==null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); }catch(e){} }
+  /* ── tiny DOM helper ── */
+  function h(tag, attrs){
+    var el = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function(k){
+      var v = attrs[k];
+      if (v == null || v === false) return;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k.slice(0,2) === 'on') el.addEventListener(k.slice(2), v);
+      else if (k in el && k !== 'list') { try { el[k] = v; } catch(e){ el.setAttribute(k, v); } }
+      else el.setAttribute(k, v === true ? '' : v);
+    });
+    for (var i = 2; i < arguments.length; i++) add(el, arguments[i]);
+    return el;
+  }
+  function add(el, c){ if (c == null || c === false) return; if (Array.isArray(c)) c.forEach(function(x){ add(el, x); }); else el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }
+  function rid(){ var s=''; var a='abcdefghijklmnopqrstuvwxyz0123456789'; for (var i=0;i<12;i++) s+=a[Math.floor(Math.random()*a.length)]; return s; }
+
+  function store(k, v){ try{ v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); }catch(e){} }
   function load(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }
 
   var toastTimer;
-  function toast(msg, ms){
-    var t = $('toast'); t.textContent = msg; t.hidden = false;
-    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.hidden = true; }, ms || 4000);
-  }
-  function status(msg, kind){ var s = $('status'); s.textContent = msg; s.className = 'status' + (kind ? ' ' + kind : ''); }
+  function toast(msg, ms){ var t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.hidden=true; }, ms||4000); }
+  function status(msg, kind){ var s=$('status'); s.textContent=msg||''; s.className='status'+(kind?' '+kind:''); }
 
   function api(path, opts){
     opts = opts || {};
-    opts.headers = Object.assign({'x-admin-password': password, 'Content-Type': 'application/json'}, opts.headers || {});
+    opts.headers = Object.assign({'x-admin-password': password, 'Content-Type':'application/json'}, opts.headers||{});
     return fetch(path, opts).then(function(r){
       return r.json().catch(function(){ return {}; }).then(function(j){
-        if(!r.ok){ var e = new Error(j.error || ('Ошибка ' + r.status)); e.status = r.status; throw e; }
+        if (!r.ok){ var e = new Error(j.error || ('Ошибка сервера ' + r.status)); e.status = r.status; throw e; }
         return j;
       });
     });
   }
 
   /* ── login ── */
-  $('loginForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    password = $('pwd').value;
-    login();
-  });
+  $('loginForm').addEventListener('submit', function(e){ e.preventDefault(); password = $('pwd').value; login(); });
   function login(){
     $('loginBtn').disabled = true; $('loginErr').textContent = '';
-    api('/api/content').then(function(j){
-      saved = j.content || {};
+    Promise.all([
+      api('/api/content'),
+      fetch('/site.template.html', {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('Не загрузился шаблон сайта'); return r.text(); })
+    ]).then(function(res){
+      template = res[1];
+      setData(res[0].data || {});
       store('ups-admin', password);
-      $('login').hidden = true; $('editor').hidden = false;
-      openSite();
+      $('login').hidden = true; $('app').hidden = false;
+      renderAll();
     }).catch(function(err){
       store('ups-admin', null);
-      $('login').hidden = false; $('editor').hidden = true;
+      $('login').hidden = false; $('app').hidden = true;
       $('loginErr').textContent = err.status === 401 ? 'Неверный пароль' : err.message;
     }).finally(function(){ $('loginBtn').disabled = false; });
+  }
+  function setData(d){
+    d.hero = d.hero || {}; d.about = d.about || {}; d.about.points = d.about.points || [];
+    d.practicesSection = d.practicesSection || {}; d.practices = d.practices || [];
+    d.weekSection = d.weekSection || {}; d.schedule = d.schedule || [];
+    d.mastersSection = d.mastersSection || {}; d.masters = d.masters || [];
+    d.route = d.route || {}; d.contacts = d.contacts || {};
+    d.practices.forEach(function(p){ p.prices = p.prices || []; if (!Array.isArray(p.bullets)) p.bullets = []; });
+    data = d; base = d.updatedAt || null; orig = JSON.stringify(d); uploads = {};
   }
   var remembered = load('ups-admin');
   if (remembered) { password = remembered; login(); }
 
-  $('logoutBtn').addEventListener('click', function(){
-    if (changes() && !confirm('Есть несохранённые изменения. Выйти без сохранения?')) return;
-    store('ups-admin', null); location.reload();
-  });
-  $('helpClose').addEventListener('click', function(){ $('help').hidden = true; });
+  /* ── dirty state ── */
+  function dirty(){ return JSON.stringify(data) !== orig; }
+  function changed(){
+    var d = dirty();
+    $('saveBtn').disabled = !d || saving;
+    if (!saving) status(d ? 'Есть несохранённые изменения' : (data && data.updatedAt ? 'Всё сохранено' : ''), d ? 'dirty' : '');
+  }
+  window.addEventListener('beforeunload', function(e){ if (data && dirty()) { e.preventDefault(); e.returnValue=''; } });
 
-  /* ── site in edit mode ── */
-  function openSite(){
-    dirtyText = {}; pendingImages = {}; pendingCode = null; updateButtons();
-    status('Загружаю сайт…');
-    var f = $('site');
-    f.onload = function(){ try { enableEditing(f.contentDocument); } catch(err){ status('Не получилось открыть сайт: ' + err.message, 'bad'); } };
-    f.src = '/?edit=' + Date.now();
+  /* ── form controls bound to data ── */
+  function input(obj, key, label, o){
+    o = o || {};
+    var el = h(o.area ? 'textarea' : 'input', { type: o.type || 'text', value: obj[key] == null ? '' : obj[key], placeholder: o.ph || '', rows: o.rows || null, inputMode: o.mode || null });
+    if (o.area) el.value = obj[key] == null ? '' : obj[key];
+    el.addEventListener('input', function(){ obj[key] = el.value; el.classList.remove('invalid'); if (o.after) o.after(el.value); changed(); });
+    if (o.id) el.dataset.key = o.id;
+    return h('label', { class: 'field' + (o.wide ? ' wide' : '') }, h('span', { text: label }), el, o.help ? h('small', { text: o.help }) : null);
+  }
+  function linesInput(obj, key, label, help){
+    var el = h('textarea', { rows: 4 }); el.value = (obj[key] || []).join('\n');
+    el.addEventListener('input', function(){ obj[key] = el.value.split('\n'); changed(); });
+    el.addEventListener('blur', function(){ obj[key] = el.value.split('\n').map(function(s){ return s.trim(); }).filter(Boolean); el.value = obj[key].join('\n'); changed(); });
+    return h('label', { class: 'field wide' }, h('span', { text: label }), el, help ? h('small', { text: help }) : null);
   }
 
-  function applySaved(d){
-    var text = saved.text || {};
-    Object.keys(text).forEach(function(k){
-      var el = d.querySelector('[data-edit="' + k + '"]');
-      if (el && el.innerHTML !== text[k]) el.innerHTML = text[k];
-    });
-    var images = saved.images || {};
-    Object.keys(images).forEach(function(k){
-      var w = d.querySelector('[data-img="' + k + '"]');
-      if (w) setImg(w, images[k] + '?v=' + encodeURIComponent(saved.updatedAt || ''));
-    });
-    if (saved.code) setCode(d, saved.code);
+  function photoInput(obj, key, label, fallback){
+    var thumb = h('div', { class: 'thumb' });
+    function paint(){
+      thumb.innerHTML = '';
+      var v = obj[key] || '';
+      var src = v.indexOf('upload:') === 0 ? (uploads[v.slice(7)] || {}).url : (v ? '/' + v : '');
+      if (src) thumb.appendChild(h('img', { src: src, alt: '' })); else thumb.textContent = fallback ? fallback() : '+';
+      rm.hidden = !v;
+    }
+    var rm = h('button', { class: 'btn small', type: 'button', text: 'Убрать фото', onclick: function(){ obj[key] = ''; paint(); changed(); } });
+    var pick = h('button', { class: 'btn small', type: 'button', text: 'Загрузить фото', onclick: function(){
+      choosePhoto(function(id){ obj[key] = 'upload:' + id; paint(); changed(); });
+    }});
+    var box = h('div', { class: 'field wide' }, h('span', { text: label }), h('div', { class: 'photo' }, thumb, h('div', { class: 'acts' }, pick, rm, h('small', { text: 'JPG, PNG или WEBP. Фото уменьшится автоматически.' }))));
+    paint();
+    return box;
   }
 
-  function setImg(wrap, src){
-    var img = wrap.querySelector('img');
-    if (!img) { img = wrap.ownerDocument.createElement('img'); img.alt = ''; wrap.appendChild(img); }
-    img.src = src;
-  }
-  function setCode(d, code){
-    d.querySelectorAll('[data-code]').forEach(function(s){ s.textContent = code; });
-    var box = d.querySelector('[data-code-boxes]');
-    if (box) box.innerHTML = code.split('').map(function(c){ return '<i>' + c.replace(/[<>&]/g,'') + '</i>'; }).join('');
-  }
-
-  function enableEditing(d){
-    doc = d;
-    applySaved(d);
-    var css = d.createElement('style');
-    css.textContent =
-      '[data-edit]{cursor:text;border-radius:3px;transition:background .15s, box-shadow .15s}' +
-      '[data-edit]:hover{box-shadow:0 0 0 2px rgba(238,91,55,.55)}' +
-      '[data-edit]:focus{outline:none;box-shadow:0 0 0 2px #EE5B37;background:rgba(238,91,55,.08)}' +
-      '[data-edit].changed{box-shadow:0 0 0 2px rgba(47,138,87,.7)}' +
-      '[data-img]{cursor:pointer;position:relative}' +
-      '[data-img]::after{content:"Заменить фото";position:absolute;left:8px;bottom:8px;padding:4px 10px;border-radius:999px;background:#12161D;color:#fff;font:600 12px/1.4 Onest,Arial,sans-serif;opacity:.85;pointer-events:none}' +
-      'figure[data-img]::after{bottom:34px}' +
-      '[data-img]:hover{outline:2px dashed #EE5B37;outline-offset:3px}' +
-      '[data-code-boxes]{cursor:pointer;outline:2px dashed rgba(238,91,55,.6);outline-offset:4px;border-radius:4px}' +
-      '.hero-top,.hero-mid{pointer-events:auto!important}#silk{pointer-events:none!important}' +
-      'summary{cursor:default}';
-    d.head.appendChild(css);
-
-    d.querySelectorAll('details').forEach(function(x){ x.open = true; });
-    d.querySelectorAll('.ph img').forEach(function(img){
-      img.addEventListener('error', function(){ if (!img.src.startsWith('data:')) img.remove(); });
-    });
-
-    // links and accordion headers must not navigate or fold while editing
-    d.addEventListener('click', function(e){
-      var t = e.target;
-      if (t.closest('a') || t.closest('summary')) e.preventDefault();
-      var w = t.closest('[data-img]');
-      if (w) { e.preventDefault(); e.stopPropagation(); imgTarget = w; $('file').value = ''; $('file').click(); return; }
-      if (t.closest('[data-code-boxes]')) { e.preventDefault(); editCode(); }
-    }, true);
-
-    d.querySelectorAll('[data-edit]').forEach(function(el){
-      el.contentEditable = 'true';
-      el.spellcheck = true;
-      el.addEventListener('input', function(){
-        dirtyText[el.dataset.edit] = true; el.classList.add('changed'); updateButtons();
-        if (el.id === 'phone' || el.closest('#big')) d.defaultView.dispatchEvent(new Event('resize'));
-      });
-      el.addEventListener('keydown', function(e){
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          if (e.shiftKey) d.execCommand('insertLineBreak'); else el.blur();
-        }
-        if (e.key === ' ' && el.closest('summary')) e.stopPropagation();
-      });
-      el.addEventListener('keyup', function(e){ if (e.key === ' ' && el.closest('summary')) e.preventDefault(); });
-      el.addEventListener('paste', function(e){
-        e.preventDefault();
-        var text = (e.clipboardData || d.defaultView.clipboardData).getData('text/plain');
-        d.execCommand('insertText', false, text.replace(/\s*\n\s*/g, ' '));
-      });
-    });
-    status('Можно редактировать. Изменённые места подсвечиваются зелёным.');
-  }
-
-  function editCode(){
-    var cur = (doc.querySelector('[data-code]') || {}).textContent || '';
-    var code = prompt('Новый код двери (цифры и буквы, например 8753В)', cur);
-    if (code == null) return;
-    code = code.trim().replace(/\s+/g, '').toUpperCase();
-    if (!/^[0-9A-Za-zА-Яа-яЁё#*]{1,12}$/.test(code)) { toast('В коде могут быть только цифры и буквы, до 12 знаков, без пробелов'); return; }
-    if (code === cur) return;
-    pendingCode = code; setCode(doc, code); updateButtons();
-  }
-
-  /* ── photos: shrink in the browser before upload ── */
+  var photoCb = null;
+  function choosePhoto(cb){ photoCb = cb; $('file').value = ''; $('file').click(); }
   $('file').addEventListener('change', function(){
     var f = this.files && this.files[0];
-    if (!f || !imgTarget) return;
+    if (!f || !photoCb) return;
+    var cb = photoCb; photoCb = null;
     if (!/^image\//.test(f.type)) { toast('Выберите фото в формате JPG, PNG или WEBP'); return; }
-    var target = imgTarget;
-    status('Готовлю фото…');
-    shrink(f, 1600, 0.84).then(function(r){
-      pendingImages[target.dataset.img] = r;
-      setImg(target, r.url);
-      target.style.outline = '2px solid #2F8A57';
-      updateButtons();
-      status('Фото заменено. Не забудьте сохранить.');
-    }).catch(function(){ toast('Не получилось открыть это фото. Попробуйте другой файл.'); status(''); });
+    shrink(f, 1600, 0.84).then(function(r){ var id = rid(); uploads[id] = r; cb(id); })
+      .catch(function(){ toast('Не получилось открыть это фото. Попробуйте другой файл.'); });
   });
-
   function shrink(file, max, q){
     return new Promise(function(resolve, reject){
       var url = URL.createObjectURL(file), im = new Image();
       im.onload = function(){
         var s = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
         var c = document.createElement('canvas');
-        c.width = Math.round(im.naturalWidth * s); c.height = Math.round(im.naturalHeight * s);
-        var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
-        var dataUrl = c.toDataURL('image/jpeg', q);
-        URL.revokeObjectURL(url);
-        resolve({ type: 'image/jpeg', data: dataUrl.split(',')[1], url: dataUrl });
+        c.width = Math.max(1, Math.round(im.naturalWidth * s)); c.height = Math.max(1, Math.round(im.naturalHeight * s));
+        var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height);
+        var d = c.toDataURL('image/jpeg', q); URL.revokeObjectURL(url);
+        resolve({ type: 'image/jpeg', data: d.split(',')[1], url: d });
       };
       im.onerror = function(){ URL.revokeObjectURL(url); reject(); };
       im.src = url;
     });
   }
 
-  /* ── save ── */
-  function changes(){ return Object.keys(dirtyText).length + Object.keys(pendingImages).length + (pendingCode ? 1 : 0); }
-  function updateButtons(){
-    var n = changes();
-    $('saveBtn').disabled = !n; $('resetBtn').disabled = !n;
-    $('saveBtn').textContent = n ? 'Сохранить (' + n + ')' : 'Сохранить';
+  /* list of items with reorder / delete */
+  function listItem(arr, i, key, titleFn, bodyFn, opts){
+    opts = opts || {};
+    var item = arr[i], isOpen = !!open[key];
+    var main = h('span'), sub = h('small');
+    function paintTitle(){ var t = titleFn(item); main.textContent = t[0] || 'Без названия'; sub.textContent = t[1] || ''; }
+    paintTitle();
+    var titleBtn = h('button', { class: 'title', type: 'button', onclick: function(){ open[key] = !open[key]; renderPanel(); } },
+      h('span', { class: 'chev', 'aria-hidden': 'true', text: '›  ' }), main, sub);
+    var head = h('div', { class: 'item-head' }, titleBtn,
+      h('button', { class: 'icon', type: 'button', title: 'Выше', 'aria-label': 'Выше', disabled: i === 0, onclick: function(){ move(arr, i, -1); } }, '↑'),
+      h('button', { class: 'icon', type: 'button', title: 'Ниже', 'aria-label': 'Ниже', disabled: i === arr.length - 1, onclick: function(){ move(arr, i, 1); } }, '↓'),
+      h('button', { class: 'icon danger', type: 'button', title: 'Удалить', 'aria-label': 'Удалить', onclick: function(){
+        var name = (opts.name && opts.name(item)) || 'этот блок';
+        var extra = opts.warn ? opts.warn(item) : '';
+        if (!confirm('Удалить «' + name + '»?' + (extra ? '\n\n' + extra : ''))) return;
+        arr.splice(i, 1); changed(); renderPanel(); toast('Удалено. Чтобы вернуть, не сохраняйте и обновите страницу.');
+      } }, '✕'));
+    var body = isOpen ? h('div', { class: 'item-body' }, bodyFn(item)) : null;
+    if (body) body.addEventListener('input', paintTitle);
+    return h('div', { class: 'item' + (isOpen ? ' open' : '') }, head, body);
+  }
+  function move(arr, i, d){ var j = i + d; if (j < 0 || j >= arr.length) return; var x = arr[i]; arr[i] = arr[j]; arr[j] = x; changed(); renderPanel(); }
+
+  /* ── tabs ── */
+  var TABS = [
+    ['home', 'Главная'], ['about', 'О студии'], ['practices', 'Направления'], ['schedule', 'Расписание'],
+    ['masters', 'Мастера'], ['route', 'Как пройти'], ['contacts', 'Контакты']
+  ];
+  function renderTabs(){
+    var nav = $('tabs'); nav.innerHTML = '';
+    TABS.forEach(function(t){
+      var n = t[0] === 'practices' ? data.practices.length : t[0] === 'masters' ? data.masters.length : t[0] === 'schedule' ? data.schedule.length : null;
+      nav.appendChild(h('button', { class: 'tab', type: 'button', role: 'tab', 'aria-selected': String(tab === t[0]), onclick: function(){ tab = t[0]; renderAll(); window.scrollTo(0, 0); } },
+        t[1], n != null ? h('span', { class: 'n', text: String(n) }) : null));
+    });
+  }
+  function renderAll(){ renderTabs(); renderPanel(); changed(); }
+  function head(title, text){ return h('div', { class: 'panel-head' }, h('h2', { text: title }), text ? h('p', { text: text }) : null); }
+  var FMT = 'Можно выделять: **жирный**, ~~зачёркнутый~~, ==подсветка==.';
+
+  function renderPanel(){
+    var p = $('panel'); p.innerHTML = '';
+    var fn = { home: pHome, about: pAbout, practices: pPractices, schedule: pSchedule, masters: pMasters, route: pRoute, contacts: pContacts }[tab];
+    add(p, fn());
   }
 
-  $('resetBtn').addEventListener('click', function(){
-    if (!confirm('Отменить все несохранённые изменения?')) return;
-    openSite();
-  });
+  function pHome(){
+    var x = data.hero;
+    return [head('Главная', 'Первый экран сайта.'),
+      h('div', { class: 'box' }, h('div', { class: 'grid' },
+        input(x, 'title', 'Заголовок', { wide: true }),
+        input(x, 'subtitle', 'Продолжение заголовка (серым)', { wide: true }),
+        input(x, 'statNum', 'Третья цифра', { ph: '1:1' }),
+        input(x, 'statLabel', 'Подпись к ней', { ph: 'индивидуально' })),
+        h('p', { class: 'hint', text: 'Цифры «направлений» и «мастеров» на главной считаются сами по спискам. Карточка «Сегодня в студии» берётся из расписания.' }))];
+  }
 
-  $('saveBtn').addEventListener('click', function(){
-    var text = {};
-    Object.keys(dirtyText).forEach(function(k){
-      var el = doc.querySelector('[data-edit="' + k + '"]');
-      if (el) text[k] = el.innerHTML;
+  function pAbout(){
+    var a = data.about;
+    return [head('О студии', 'Блок сразу под первым экраном.'),
+      h('div', { class: 'box' }, input(a, 'lead', 'Главный текст', { area: true, rows: 4, help: FMT })),
+      h('div', { class: 'box' }, h('h3', { text: 'Преимущества' }),
+        a.points.map(function(pt, i){
+          return listItem(a.points, i, 'pt' + i, function(x){ return [x.title]; }, function(x){
+            return h('div', { class: 'grid' }, input(x, 'title', 'Заголовок', { wide: true }), input(x, 'text', 'Текст', { area: true, wide: true, rows: 2 }));
+          }, { name: function(x){ return x.title; } });
+        }),
+        h('button', { class: 'add', type: 'button', onclick: function(){ a.points.push({ title: '', text: '' }); open['pt' + (a.points.length - 1)] = true; changed(); renderPanel(); } }, '+ Добавить преимущество'))];
+  }
+
+  function pPractices(){
+    var s = data.practicesSection;
+    return [head('Направления', 'Каждое направление — раскрывающаяся строка на сайте. Порядок здесь = порядок на сайте.'),
+      h('div', { class: 'box' }, h('div', { class: 'grid' }, input(s, 'title', 'Заголовок раздела'), input(s, 'intro', 'Подзаголовок'))),
+      data.practices.map(function(pr, i){
+        return listItem(data.practices, i, 'pr:' + pr.id, function(x){ return [x.title || 'Новое направление', x.priceShort]; }, practiceForm, {
+          name: function(x){ return x.title || 'Новое направление'; },
+          warn: function(x){ var n = data.schedule.filter(function(c){ return c.practice === x.id; }).length; return n ? 'Это направление указано в расписании (' + n + ' зан.). Занятия в расписании останутся, их можно удалить на вкладке «Расписание».' : ''; }
+        });
+      }),
+      h('button', { class: 'add', type: 'button', onclick: function(){
+        var id = 'p-' + rid().slice(0, 6);
+        data.practices.push({ id: id, title: '', format: '', priceShort: '', text: '', bullets: [], note: '', photo: '', photoCaption: '', when: '', whenNote: '', prices: [], priceText: '', priceNote: '', teacher: '', phoneLabel: 'Запись', phone: '' });
+        open['pr:' + id] = true; changed(); renderAll();
+        setTimeout(function(){ var el = document.querySelector('.item.open:last-of-type input'); if (el) { el.focus(); el.scrollIntoView({ block: 'center' }); } }, 30);
+      } }, '+ Добавить направление')];
+  }
+  function practiceForm(x){
+    var rows = h('div', { class: 'rows' });
+    function paintRows(){
+      rows.innerHTML = '';
+      x.prices.forEach(function(r, i){
+        rows.appendChild(h('div', { class: 'row-line' },
+          rowInput(r, 'label', 'Например: Абонемент на 4 занятия'), rowInput(r, 'value', '2 700 ₽'),
+          h('button', { class: 'icon danger', type: 'button', 'aria-label': 'Удалить цену', onclick: function(){ x.prices.splice(i, 1); paintRows(); changed(); } }, '✕')));
+      });
+      rows.appendChild(h('button', { class: 'btn small', type: 'button', onclick: function(){ x.prices.push({ label: '', value: '' }); paintRows(); changed(); var ins = rows.querySelectorAll('input'); if (ins.length) ins[ins.length - 2].focus(); } }, '+ Строка цены'));
+    }
+    paintRows();
+    return [
+      h('div', { class: 'grid' },
+        input(x, 'title', 'Название', { wide: true, id: 'title' }),
+        input(x, 'format', 'Коротко в строке списка', { ph: 'Индивидуально / Вторник, 19:30' }),
+        input(x, 'priceShort', 'Цена в строке списка', { ph: 'от 2 700 ₽' }),
+        input(x, 'text', 'Описание', { area: true, wide: true, rows: 5, help: 'Пустая строка — новый абзац. ' + FMT }),
+        linesInput(x, 'bullets', 'Пункты списка', 'Каждая строка — отдельный пункт. Можно оставить пустым.'),
+        input(x, 'note', 'Примечание мелким шрифтом', { area: true, wide: true, rows: 2 }),
+        photoInput(x, 'photo', 'Фото в описании (необязательно)'),
+        input(x, 'photoCaption', 'Подпись к фото', { wide: true })),
+      h('h3', { text: 'Справа в карточке' }),
+      h('div', { class: 'grid' },
+        input(x, 'when', 'Когда', { area: true, rows: 2, wide: true, help: 'Например: Вторник, 19:30–21:30. Новая строка — с новой строки на сайте.' }),
+        input(x, 'whenNote', 'Примечание ко времени (мелко)', { wide: true, ph: '2 субботы в месяце, даты уточняйте' })),
+      h('div', { class: 'field' }, h('span', { text: 'Цены (таблица)' }), rows),
+      h('div', { class: 'grid' },
+        input(x, 'priceText', 'Цена текстом', { area: true, rows: 2, wide: true, help: 'Если цен в таблице нет или нужно пояснение: «Донейшн», «Уточняйте у ведущей».' }),
+        input(x, 'priceNote', 'Примечание к ценам (мелко)', { wide: true, ph: 'Абонемент действует месяц с даты активации' }),
+        input(x, 'teacher', 'Ведёт', { wide: true, ph: 'Имя, кто ведёт' }),
+        input(x, 'phoneLabel', 'Подпись к телефону', { ph: 'Запись' }),
+        input(x, 'phone', 'Телефон для записи', { type: 'tel', ph: '+7 999 000-00-00' }))
+    ];
+  }
+  function rowInput(obj, key, ph){
+    var el = h('input', { class: 'mini', type: 'text', value: obj[key] || '', placeholder: ph });
+    el.addEventListener('input', function(){ obj[key] = el.value; changed(); });
+    return el;
+  }
+
+  function pSchedule(){
+    var s = data.weekSection;
+    var out = [head('Расписание', 'Групповые занятия по дням. Из этого списка строятся сетка недели на сайте, список на телефоне и карточка «Сегодня в студии».'),
+      h('div', { class: 'box' }, h('div', { class: 'grid' }, input(s, 'title', 'Заголовок раздела'), input(s, 'intro', 'Подзаголовок', { area: true, rows: 2 })))];
+    DAYS.forEach(function(dname, day){
+      var list = data.schedule.map(function(c, i){ return { c: c, i: i }; }).filter(function(o){ return +o.c.day === day; })
+        .sort(function(a, b){ return String(a.c.start).localeCompare(String(b.c.start)); });
+      out.push(h('div', { class: 'box day' },
+        h('div', { class: 'day-head' }, h('h3', {}, dname, h('small', { text: list.length ? list.length + ' зан.' : 'нет занятий' }))),
+        list.length ? list.map(function(o){ return classRow(o.c, o.i); }) : h('p', { class: 'empty-day', text: 'В этот день групп нет.' }),
+        h('button', { class: 'btn small', type: 'button', style: 'align-self:flex-start', onclick: function(){
+          data.schedule.push({ day: day, start: '', end: '', title: '', short: '', practice: '', rare: false });
+          changed(); renderAll();
+          setTimeout(function(){ var rows = document.querySelectorAll('.day')[day].querySelectorAll('.cls'); var last = rows[rows.length - 1]; if (last) { last.querySelector('input').focus(); } }, 30);
+        } }, '+ Добавить занятие')));
     });
-    // split photos into batches so each request stays well under the 4.5 MB limit
-    var batches = [{ text: text, images: {} }], size = 0;
-    if (pendingCode) batches[0].code = pendingCode;
-    Object.keys(pendingImages).forEach(function(k){
-      var p = pendingImages[k], len = p.data.length;
-      if (size + len > 3200000 && Object.keys(batches[batches.length - 1].images).length) { batches.push({ images: {} }); size = 0; }
-      batches[batches.length - 1].images[k] = { type: p.type, data: p.data };
+    return out;
+  }
+  function normTime(v){
+    v = String(v || '').trim().replace(/[.,\- ]/g, ':');
+    var m = /^(\d{1,2}):?(\d{2})$/.exec(v);
+    if (!m) return v;
+    var hh = +m[1], mm = +m[2];
+    if (hh > 23 || mm > 59) return v;
+    return (hh < 10 ? '0' : '') + hh + ':' + m[2];
+  }
+  function timeInput(obj, key, ph){
+    var el = h('input', { type: 'text', value: obj[key] || '', placeholder: ph, inputMode: 'numeric', maxLength: 5, autocomplete: 'off' });
+    el.addEventListener('input', function(){ obj[key] = el.value.trim(); el.classList.remove('invalid'); changed(); });
+    el.addEventListener('blur', function(){
+      var v = normTime(el.value);
+      el.value = v; obj[key] = v;
+      if (v && !SiteRender.time(v)) el.classList.add('invalid');
+      changed();
+    });
+    return el;
+  }
+  function classRow(c, i){
+    function f(cls, label, el){ return h('label', { class: 'field ' + cls }, h('span', { text: label }), el); }
+    var start = timeInput(c, 'start', '19:00'); start.dataset.key = 'start';
+    var end = timeInput(c, 'end', 'необяз.');
+    var title = h('input', { type: 'text', value: c.title || '', placeholder: 'Название занятия' });
+    title.dataset.key = 'title';
+    title.addEventListener('input', function(){ c.title = title.value; title.classList.remove('invalid'); changed(); });
+    var sel = h('select', {}, h('option', { value: '', text: '— не связано —' }),
+      data.practices.map(function(p){ return h('option', { value: p.id, text: p.title || 'Без названия', selected: c.practice === p.id }); }));
+    sel.addEventListener('change', function(){
+      c.practice = sel.value;
+      var p = data.practices.filter(function(x){ return x.id === sel.value; })[0];
+      if (p && !c.title) { c.title = p.title; title.value = p.title; }
+      changed();
+    });
+    var rare = h('input', { type: 'checkbox', checked: !!c.rare });
+    rare.addEventListener('change', function(){ c.rare = rare.checked; changed(); });
+    var short = h('input', { class: 'mini', type: 'text', value: c.short || '', placeholder: 'Короткое название для сетки (необязательно)', style: 'max-width:340px' });
+    short.addEventListener('input', function(){ c.short = short.value; changed(); });
+    return h('div', { class: 'cls' },
+      f('f-start', 'Начало', start), f('f-end', 'Конец', end), f('f-title', 'Занятие', title), f('f-link', 'Направление (ссылка)', sel),
+      h('button', { class: 'icon danger del', type: 'button', 'aria-label': 'Удалить занятие', onclick: function(){
+        if (!confirm('Удалить занятие «' + (c.title || 'без названия') + '» ' + (c.start || '') + '?')) return;
+        data.schedule.splice(i, 1); changed(); renderAll();
+      } }, '✕'),
+      h('div', { class: 'opts' }, h('label', { class: 'check' }, rare, 'Не каждую неделю'), short));
+  }
+
+  function pMasters(){
+    var s = data.mastersSection;
+    return [head('Мастера', 'Карточки с фото и телефоном. Без фото показываются инициалы.'),
+      h('div', { class: 'box' }, h('div', { class: 'grid' }, input(s, 'title', 'Заголовок раздела'), input(s, 'intro', 'Подзаголовок', { area: true, rows: 2 }))),
+      data.masters.map(function(m, i){
+        return listItem(data.masters, i, 'm:' + m.id, function(x){ return [x.name || 'Новый мастер', x.phone]; }, function(x){
+          return h('div', { class: 'grid' },
+            photoInput(x, 'photo', 'Фото (вертикальное, примерно 4:5)', function(){ return SiteRender.initials(x.name); }),
+            input(x, 'name', 'Имя', { wide: true, id: 'name' }),
+            input(x, 'role', 'Чем занимается', { area: true, rows: 2, wide: true }),
+            input(x, 'phone', 'Телефон', { type: 'tel', ph: '+7 999 000-00-00' }));
+        }, { name: function(x){ return x.name || 'Новый мастер'; } });
+      }),
+      h('button', { class: 'add', type: 'button', onclick: function(){
+        var id = 'm-' + rid().slice(0, 6);
+        data.masters.push({ id: id, name: '', role: '', phone: '', photo: '' });
+        open['m:' + id] = true; changed(); renderAll();
+      } }, '+ Добавить мастера')];
+  }
+
+  function pRoute(){
+    var r = data.route;
+    return [head('Как пройти', 'Три шага, фото входа и схема.'),
+      h('div', { class: 'box' }, h('div', { class: 'grid' }, input(r, 'title', 'Заголовок раздела'), input(r, 'intro', 'Подзаголовок', { area: true, rows: 2 }))),
+      h('div', { class: 'box' }, h('h3', { text: 'Шаги' }), h('div', { class: 'grid' },
+        input(r, 'step1Title', 'Шаг 1 — заголовок'), input(r, 'step1Text', 'Шаг 1 — текст', { area: true, rows: 2 }),
+        input(r, 'step2Title', 'Шаг 2 — заголовок'), input(r, 'step2Text', 'Шаг 2 — текст', { area: true, rows: 2 }),
+        input(r, 'code', 'Код двери', { ph: '8753В', help: 'Цифры и буквы. Показывается в шаге 2, на схеме и в контактах.' }),
+        h('span'),
+        input(r, 'step3Title', 'Шаг 3 — заголовок'), input(r, 'step3Text', 'Шаг 3 — текст', { area: true, rows: 2 }))),
+      h('div', { class: 'box' }, h('div', { class: 'grid' },
+        photoInput(r, 'photo', 'Фото входа'), input(r, 'photoCaption', 'Подпись к фото', { wide: true }),
+        input(r, 'street', 'Улица на схеме', { wide: true }), input(r, 'schemeNote', 'Подпись под схемой', { area: true, rows: 2, wide: true })))];
+  }
+
+  function pContacts(){
+    var c = data.contacts;
+    return [head('Контакты', 'Оранжевый блок внизу сайта. Телефон отсюда же стоит в шапке.'),
+      h('div', { class: 'box' }, h('div', { class: 'grid' },
+        input(c, 'phone', 'Телефон студии', { type: 'tel' }), input(c, 'kicker', 'Надпись над телефоном'),
+        input(c, 'address', 'Адрес', { wide: true }),
+        input(c, 'addressNote', 'Как войти', { area: true, rows: 2, wide: true, help: 'Напишите [код] — на сайте подставится код двери из вкладки «Как пройти».' }),
+        input(c, 'telegram', 'Telegram (ссылка)', { type: 'url', ph: 'https://t.me/…' }), input(c, 'vk', 'ВКонтакте (ссылка)', { type: 'url', ph: 'https://vk.com/…' }),
+        input(c, 'yandex', 'Яндекс Карты (ссылка)', { type: 'url', wide: true }),
+        input(c, 'tagline', 'Подпись в самом низу', { wide: true })))];
+  }
+
+  /* ── checks before save ── */
+  function validate(){
+    var problems = [];
+    data.practices.forEach(function(p){ if (!String(p.title || '').trim()) problems.push({ tab: 'practices', key: 'pr:' + p.id, msg: 'У одного направления нет названия' }); });
+    data.masters.forEach(function(m){ if (!String(m.name || '').trim()) problems.push({ tab: 'masters', key: 'm:' + m.id, msg: 'У одного мастера нет имени' }); });
+    data.schedule.forEach(function(c){
+      if (!SiteRender.time(c.start)) problems.push({ tab: 'schedule', msg: c.start ? 'В расписании (' + DAYS[c.day] + ') время «' + c.start + '» записано неверно, нужно как 19:30' : 'В расписании (' + DAYS[c.day] + ') не указано время начала' });
+      else if (!String(c.title || '').trim()) problems.push({ tab: 'schedule', msg: 'В расписании (' + DAYS[c.day] + ', ' + c.start + ') нет названия занятия' });
+      else if (c.end && !SiteRender.time(c.end)) problems.push({ tab: 'schedule', msg: 'В расписании (' + DAYS[c.day] + ', ' + c.start + ') время конца записано неверно, нужно как 21:30' });
+      else if (c.end && SiteRender.time(c.end).h <= SiteRender.time(c.start).h) problems.push({ tab: 'schedule', msg: 'В расписании (' + DAYS[c.day] + ', ' + c.start + ') конец раньше начала' });
+    });
+    ['telegram', 'vk', 'yandex'].forEach(function(k){ var v = data.contacts[k]; if (v && !/^https?:\/\//i.test(v)) problems.push({ tab: 'contacts', msg: 'Ссылка должна начинаться с https://' }); });
+    return problems;
+  }
+  function showProblem(p){
+    tab = p.tab; if (p.key) open[p.key] = true; renderAll();
+    setTimeout(function(){
+      var bad = [];
+      if (p.tab === 'schedule') document.querySelectorAll('.cls').forEach(function(row){
+        var st = row.querySelector('[data-key="start"]'), ti = row.querySelector('[data-key="title"]');
+        if (!SiteRender.time(st.value)) bad.push(st); else if (!ti.value.trim()) bad.push(ti);
+      });
+      if (p.key) document.querySelectorAll('.item.open [data-key="title"], .item.open [data-key="name"]').forEach(function(el){ if (!el.value.trim()) bad.push(el); });
+      bad.forEach(function(el){ el.classList.add('invalid'); });
+      if (bad[0]) { bad[0].scrollIntoView({ block: 'center' }); bad[0].focus(); }
+    }, 30);
+  }
+
+  /* ── save ── */
+  $('saveBtn').addEventListener('click', save);
+  document.addEventListener('keydown', function(e){ if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); if (!$('saveBtn').disabled) save(); } });
+
+  function save(){
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    var problems = validate();
+    if (problems.length) { toast(problems[0].msg + '. Исправьте и сохраните ещё раз.', 6000); showProblem(problems[0]); status(problems[0].msg, 'bad'); return; }
+    // only photos still used in the document are uploaded
+    var json = JSON.stringify(data), used = {};
+    Object.keys(uploads).forEach(function(id){ if (json.indexOf('"upload:' + id + '"') !== -1) used[id] = uploads[id]; });
+    var batches = [{}], size = 0;
+    Object.keys(used).forEach(function(id){
+      var len = used[id].data.length;
+      if (size + len > 3000000 && Object.keys(batches[batches.length - 1]).length) { batches.push({}); size = 0; }
+      batches[batches.length - 1][id] = { type: used[id].type, data: used[id].data };
       size += len;
     });
-    $('saveBtn').disabled = true; $('resetBtn').disabled = true;
-    status('Сохраняю…');
-    var i = 0;
+    saving = true; $('saveBtn').disabled = true; status('Сохраняю…');
+    var paths = {}, i = 0;
     (function next(){
-      if (i >= batches.length) return done();
-      api('/api/save', { method: 'POST', body: JSON.stringify(batches[i]) }).then(function(){ i++; next(); }).catch(fail);
+      var last = i === batches.length - 1;
+      var body = { images: batches[i] };
+      if (last) {
+        var doc = JSON.parse(JSON.stringify(data).replace(/"upload:([a-z0-9]+)"/g, function(m, id){ return paths[id] ? JSON.stringify(paths[id]) : m; }));
+        body.data = doc; body.base = base;
+      }
+      api('/api/save', { method: 'POST', body: JSON.stringify(body) }).then(function(r){
+        Object.assign(paths, r.paths || {});
+        if (!last) { i++; return next(); }
+        // swap uploaded photos to their real paths so the editor shows the saved state
+        var fixed = JSON.parse(JSON.stringify(data).replace(/"upload:([a-z0-9]+)"/g, function(m, id){ return paths[id] ? JSON.stringify(paths[id]) : '""'; }));
+        fixed.updatedAt = r.updatedAt;
+        Object.keys(paths).forEach(function(id){ // keep showing the local copy until the site redeploys
+          localPreview[paths[id]] = (uploads[id] || {}).url;
+        });
+        saving = false; setData(fixed); renderAll();
+        status('Сохранено. На сайте изменения появятся примерно через минуту.', 'ok');
+        toast('Сохранено. Сайт обновится примерно через минуту.', 6000);
+      }).catch(function(err){
+        saving = false; changed();
+        if (err.status === 401) { store('ups-admin', null); status('Пароль не подходит. Обновите страницу и войдите заново.', 'bad'); return; }
+        status('Не сохранилось: ' + err.message, 'bad'); toast('Не сохранилось: ' + err.message, 8000);
+      });
     })();
-    function done(){
-      Object.keys(text).forEach(function(k){ (saved.text = saved.text || {})[k] = text[k]; var el = doc.querySelector('[data-edit="' + k + '"]'); if (el) el.classList.remove('changed'); });
-      if (pendingCode) saved.code = pendingCode;
-      doc.querySelectorAll('[data-img]').forEach(function(w){ w.style.outline = ''; });
-      dirtyText = {}; pendingImages = {}; pendingCode = null; updateButtons();
-      status('Сохранено. На сайте изменения появятся примерно через минуту.', 'ok');
-      toast('Сохранено. Сайт обновится примерно через минуту.', 6000);
-    }
-    function fail(err){
-      updateButtons();
-      if (err.status === 401) { store('ups-admin', null); status('Пароль больше не подходит. Войдите заново.', 'bad'); return; }
-      status('Не сохранилось: ' + err.message, 'bad');
-      toast('Не сохранилось: ' + err.message, 7000);
-    }
-  });
+  }
+  var localPreview = {};
 
-  window.addEventListener('beforeunload', function(e){ if (changes()) { e.preventDefault(); e.returnValue = ''; } });
+  /* ── preview ── */
+  function previewData(){
+    var json = JSON.stringify(data).replace(/"upload:([a-z0-9]+)"/g, function(m, id){ return uploads[id] ? JSON.stringify(uploads[id].url) : '""'; });
+    var d = JSON.parse(json);
+    // photos saved a moment ago are not on the site yet: show the local copy
+    json = JSON.stringify(d).replace(/"(img\/uploads\/[a-z0-9]+\.(?:jpg|png|webp))"/g, function(m, p){ return localPreview[p] ? JSON.stringify(localPreview[p]) : m; });
+    return JSON.parse(json);
+  }
+  $('previewBtn').addEventListener('click', function(){
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    var html = SiteRender.render(template, previewData(), { preview: true });
+    // links inside the preview must not navigate away
+    html = html.replace('</body>', '<script>document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.getAttribute("href").charAt(0)!=="#")e.preventDefault()},true)<\/script></body>');
+    $('pvFrame').srcdoc = html;
+    $('preview').hidden = false; document.body.style.overflow = 'hidden';
+  });
+  $('pvClose').addEventListener('click', function(){ $('preview').hidden = true; document.body.style.overflow = ''; $('pvFrame').srcdoc = ''; });
+  $('pvDesk').addEventListener('click', function(){ $('pvWrap').classList.remove('phone'); this.setAttribute('aria-pressed', 'true'); $('pvPhone').setAttribute('aria-pressed', 'false'); });
+  $('pvPhone').addEventListener('click', function(){ $('pvWrap').classList.add('phone'); this.setAttribute('aria-pressed', 'true'); $('pvDesk').setAttribute('aria-pressed', 'false'); });
+
+  $('logoutBtn2').addEventListener('click', function(){ $('logoutBtn').click(); });
+  $('logoutBtn').addEventListener('click', function(){
+    if (dirty() && !confirm('Есть несохранённые изменения. Всё равно выйти?')) return;
+    store('ups-admin', null); data = null; location.reload();
+  });
 })();
 </script>
 </body>

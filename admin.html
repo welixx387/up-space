@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Ап Спейс — редактор</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Onest:wght@400;500;600&display=swap">
+<style>
+/* Layout: login card → editor = slim toolbar over the live site in a frame */
+:root{
+  --bg:#E4EAF0; --panel:#FFFFFF; --ink:#12161D; --muted:#566170; --line:#CCD5DE;
+  --accent:#EE5B37; --on-accent:#1B0E09; --ok:#2F8A57; --err:#C2401F;
+  --f-display:"Dela Gothic One","Arial Black",sans-serif;
+  --f-body:"Onest","Segoe UI","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0B1119; --panel:#141C27; --ink:#E9EEF3; --muted:#91A0B0; --line:#25313F;
+  --accent:#F2683F; --on-accent:#1B0E09; --ok:#5BC48A; --err:#FF8A6B; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input{font:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* login */
+.login{min-height:100%;display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.card{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:28px;display:flex;flex-direction:column;gap:16px}
+.card h1{margin:0;font:400 1.5rem/1.1 var(--f-display);text-transform:uppercase}
+.card p{margin:0;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:.85rem;color:var(--muted)}
+.field input{padding:12px 14px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.field input:focus{border-color:var(--accent);outline:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:999px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn:disabled{opacity:.45;cursor:default}
+.err{color:var(--err);font-size:.9rem;min-height:1.3em}
+
+/* editor */
+.editor{height:100%;display:grid;grid-template-rows:auto auto 1fr}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--panel);border-bottom:1px solid var(--line)}
+.bar .name{font:400 1rem/1 var(--f-display);text-transform:uppercase}
+.bar .name small{font:500 .8rem var(--f-body);text-transform:none;color:var(--muted);margin-left:8px}
+.status{font-size:.88rem;color:var(--muted);margin-right:auto;min-width:0}
+.status.ok{color:var(--ok)} .status.bad{color:var(--err)}
+.help{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:.85rem;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+.help b{color:var(--ink);font-weight:600}
+.help .x{margin-left:auto;background:none;border:0;color:var(--muted);cursor:pointer;padding:2px 6px}
+iframe{width:100%;height:100%;border:0;display:block;background:var(--panel)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:min(560px,calc(100% - 32px));padding:12px 18px;border-radius:8px;background:var(--ink);color:var(--panel);font-size:.92rem;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:5}
+@media (max-width:640px){.bar .name small{display:none}.status{order:5;flex-basis:100%}}
+</style>
+</head>
+<body>
+
+<main class="login" id="login">
+  <form class="card" id="loginForm" autocomplete="on">
+    <h1>Ап Спейс</h1>
+    <p>Редактор сайта. Введите пароль, чтобы менять тексты и фото.</p>
+    <div class="field">
+      <label for="pwd">Пароль</label>
+      <input id="pwd" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn primary" id="loginBtn" type="submit">Войти</button>
+    <div class="err" id="loginErr" role="alert"></div>
+  </form>
+</main>
+
+<div class="editor" id="editor" hidden>
+  <div class="bar">
+    <span class="name">Ап Спейс<small>редактор</small></span>
+    <span class="status" id="status">Загружаю сайт…</span>
+    <a class="btn" href="/" target="_blank" rel="noopener">Открыть сайт</a>
+    <button class="btn" id="resetBtn" type="button" disabled>Отменить</button>
+    <button class="btn primary" id="saveBtn" type="button" disabled>Сохранить</button>
+    <button class="btn" id="logoutBtn" type="button">Выйти</button>
+  </div>
+  <div class="help" id="help">
+    <span><b>Текст:</b> нажмите и печатайте</span>
+    <span><b>Новая строка:</b> Shift + Enter</span>
+    <span><b>Фото:</b> нажмите на фото и выберите файл</span>
+    <span><b>Код двери:</b> нажмите на цифры кода</span>
+    <button class="x" id="helpClose" type="button" aria-label="Скрыть подсказку">✕</button>
+  </div>
+  <iframe id="site" title="Сайт в режиме редактирования"></iframe>
+</div>
+
+<input type="file" id="file" accept="image/jpeg,image/png,image/webp" hidden>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var password = '';
+  var saved = {};           // content from the server
+  var dirtyText = {};       // key -> true
+  var pendingImages = {};   // key -> {data, type, url}
+  var pendingCode = null;
+  var doc = null;           // iframe document
+  var imgTarget = null;
+
+  function store(k, v){ try{ v==null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); }catch(e){} }
+  function load(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }
+
+  var toastTimer;
+  function toast(msg, ms){
+    var t = $('toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.hidden = true; }, ms || 4000);
+  }
+  function status(msg, kind){ var s = $('status'); s.textContent = msg; s.className = 'status' + (kind ? ' ' + kind : ''); }
+
+  function api(path, opts){
+    opts = opts || {};
+    opts.headers = Object.assign({'x-admin-password': password, 'Content-Type': 'application/json'}, opts.headers || {});
+    return fetch(path, opts).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(j){
+        if(!r.ok){ var e = new Error(j.error || ('Ошибка ' + r.status)); e.status = r.status; throw e; }
+        return j;
+      });
+    });
+  }
+
+  /* ── login ── */
+  $('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    password = $('pwd').value;
+    login();
+  });
+  function login(){
+    $('loginBtn').disabled = true; $('loginErr').textContent = '';
+    api('/api/content').then(function(j){
+      saved = j.content || {};
+      store('ups-admin', password);
+      $('login').hidden = true; $('editor').hidden = false;
+      openSite();
+    }).catch(function(err){
+      store('ups-admin', null);
+      $('login').hidden = false; $('editor').hidden = true;
+      $('loginErr').textContent = err.status === 401 ? 'Неверный пароль' : err.message;
+    }).finally(function(){ $('loginBtn').disabled = false; });
+  }
+  var remembered = load('ups-admin');
+  if (remembered) { password = remembered; login(); }
+
+  $('logoutBtn').addEventListener('click', function(){
+    if (changes() && !confirm('Есть несохранённые изменения. Выйти без сохранения?')) return;
+    store('ups-admin', null); location.reload();
+  });
+  $('helpClose').addEventListener('click', function(){ $('help').hidden = true; });
+
+  /* ── site in edit mode ── */
+  function openSite(){
+    dirtyText = {}; pendingImages = {}; pendingCode = null; updateButtons();
+    status('Загружаю сайт…');
+    var f = $('site');
+    f.onload = function(){ try { enableEditing(f.contentDocument); } catch(err){ status('Не получилось открыть сайт: ' + err.message, 'bad'); } };
+    f.src = '/?edit=' + Date.now();
+  }
+
+  function applySaved(d){
+    var text = saved.text || {};
+    Object.keys(text).forEach(function(k){
+      var el = d.querySelector('[data-edit="' + k + '"]');
+      if (el && el.innerHTML !== text[k]) el.innerHTML = text[k];
+    });
+    var images = saved.images || {};
+    Object.keys(images).forEach(function(k){
+      var w = d.querySelector('[data-img="' + k + '"]');
+      if (w) setImg(w, images[k] + '?v=' + encodeURIComponent(saved.updatedAt || ''));
+    });
+    if (saved.code) setCode(d, saved.code);
+  }
+
+  function setImg(wrap, src){
+    var img = wrap.querySelector('img');
+    if (!img) { img = wrap.ownerDocument.createElement('img'); img.alt = ''; wrap.appendChild(img); }
+    img.src = src;
+  }
+  function setCode(d, code){
+    d.querySelectorAll('[data-code]').forEach(function(s){ s.textContent = code; });
+    var box = d.querySelector('[data-code-boxes]');
+    if (box) box.innerHTML = code.split('').map(function(c){ return '<i>' + c.replace(/[<>&]/g,'') + '</i>'; }).join('');
+  }
+
+  function enableEditing(d){
+    doc = d;
+    applySaved(d);
+    var css = d.createElement('style');
+    css.textContent =
+      '[data-edit]{cursor:text;border-radius:3px;transition:background .15s, box-shadow .15s}' +
+      '[data-edit]:hover{box-shadow:0 0 0 2px rgba(238,91,55,.55)}' +
+      '[data-edit]:focus{outline:none;box-shadow:0 0 0 2px #EE5B37;background:rgba(238,91,55,.08)}' +
+      '[data-edit].changed{box-shadow:0 0 0 2px rgba(47,138,87,.7)}' +
+      '[data-img]{cursor:pointer;position:relative}' +
+      '[data-img]::after{content:"Заменить фото";position:absolute;left:8px;bottom:8px;padding:4px 10px;border-radius:999px;background:#12161D;color:#fff;font:600 12px/1.4 Onest,Arial,sans-serif;opacity:.85;pointer-events:none}' +
+      'figure[data-img]::after{bottom:34px}' +
+      '[data-img]:hover{outline:2px dashed #EE5B37;outline-offset:3px}' +
+      '[data-code-boxes]{cursor:pointer;outline:2px dashed rgba(238,91,55,.6);outline-offset:4px;border-radius:4px}' +
+      '.hero-top,.hero-mid{pointer-events:auto!important}#silk{pointer-events:none!important}' +
+      'summary{cursor:default}';
+    d.head.appendChild(css);
+
+    d.querySelectorAll('details').forEach(function(x){ x.open = true; });
+    d.querySelectorAll('.ph img').forEach(function(img){
+      img.addEventListener('error', function(){ if (!img.src.startsWith('data:')) img.remove(); });
+    });
+
+    // links and accordion headers must not navigate or fold while editing
+    d.addEventListener('click', function(e){
+      var t = e.target;
+      if (t.closest('a') || t.closest('summary')) e.preventDefault();
+      var w = t.closest('[data-img]');
+      if (w) { e.preventDefault(); e.stopPropagation(); imgTarget = w; $('file').value = ''; $('file').click(); return; }
+      if (t.closest('[data-code-boxes]')) { e.preventDefault(); editCode(); }
+    }, true);
+
+    d.querySelectorAll('[data-edit]').forEach(function(el){
+      el.contentEditable = 'true';
+      el.spellcheck = true;
+      el.addEventListener('input', function(){
+        dirtyText[el.dataset.edit] = true; el.classList.add('changed'); updateButtons();
+        if (el.id === 'phone' || el.closest('#big')) d.defaultView.dispatchEvent(new Event('resize'));
+      });
+      el.addEventListener('keydown', function(e){
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (e.shiftKey) d.execCommand('insertLineBreak'); else el.blur();
+        }
+        if (e.key === ' ' && el.closest('summary')) e.stopPropagation();
+      });
+      el.addEventListener('keyup', function(e){ if (e.key === ' ' && el.closest('summary')) e.preventDefault(); });
+      el.addEventListener('paste', function(e){
+        e.preventDefault();
+        var text = (e.clipboardData || d.defaultView.clipboardData).getData('text/plain');
+        d.execCommand('insertText', false, text.replace(/\s*\n\s*/g, ' '));
+      });
+    });
+    status('Можно редактировать. Изменённые места подсвечиваются зелёным.');
+  }
+
+  function editCode(){
+    var cur = (doc.querySelector('[data-code]') || {}).textContent || '';
+    var code = prompt('Новый код двери (цифры)', cur);
+    if (code == null) return;
+    code = code.trim();
+    if (!/^[0-9A-Za-z#*]{1,12}$/.test(code)) { toast('Код может содержать только цифры и буквы, до 12 знаков'); return; }
+    if (code === cur) return;
+    pendingCode = code; setCode(doc, code); updateButtons();
+  }
+
+  /* ── photos: shrink in the browser before upload ── */
+  $('file').addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    if (!f || !imgTarget) return;
+    if (!/^image\//.test(f.type)) { toast('Выберите фото в формате JPG, PNG или WEBP'); return; }
+    var target = imgTarget;
+    status('Готовлю фото…');
+    shrink(f, 1600, 0.84).then(function(r){
+      pendingImages[target.dataset.img] = r;
+      setImg(target, r.url);
+      target.style.outline = '2px solid #2F8A57';
+      updateButtons();
+      status('Фото заменено. Не забудьте сохранить.');
+    }).catch(function(){ toast('Не получилось открыть это фото. Попробуйте другой файл.'); status(''); });
+  });
+
+  function shrink(file, max, q){
+    return new Promise(function(resolve, reject){
+      var url = URL.createObjectURL(file), im = new Image();
+      im.onload = function(){
+        var s = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
+        var c = document.createElement('canvas');
+        c.width = Math.round(im.naturalWidth * s); c.height = Math.round(im.naturalHeight * s);
+        var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+        var dataUrl = c.toDataURL('image/jpeg', q);
+        URL.revokeObjectURL(url);
+        resolve({ type: 'image/jpeg', data: dataUrl.split(',')[1], url: dataUrl });
+      };
+      im.onerror = function(){ URL.revokeObjectURL(url); reject(); };
+      im.src = url;
+    });
+  }
+
+  /* ── save ── */
+  function changes(){ return Object.keys(dirtyText).length + Object.keys(pendingImages).length + (pendingCode ? 1 : 0); }
+  function updateButtons(){
+    var n = changes();
+    $('saveBtn').disabled = !n; $('resetBtn').disabled = !n;
+    $('saveBtn').textContent = n ? 'Сохранить (' + n + ')' : 'Сохранить';
+  }
+
+  $('resetBtn').addEventListener('click', function(){
+    if (!confirm('Отменить все несохранённые изменения?')) return;
+    openSite();
+  });
+
+  $('saveBtn').addEventListener('click', function(){
+    var text = {};
+    Object.keys(dirtyText).forEach(function(k){
+      var el = doc.querySelector('[data-edit="' + k + '"]');
+      if (el) text[k] = el.innerHTML;
+    });
+    // split photos into batches so each request stays well under the 4.5 MB limit
+    var batches = [{ text: text, images: {} }], size = 0;
+    if (pendingCode) batches[0].code = pendingCode;
+    Object.keys(pendingImages).forEach(function(k){
+      var p = pendingImages[k], len = p.data.length;
+      if (size + len > 3200000 && Object.keys(batches[batches.length - 1].images).length) { batches.push({ images: {} }); size = 0; }
+      batches[batches.length - 1].images[k] = { type: p.type, data: p.data };
+      size += len;
+    });
+    $('saveBtn').disabled = true; $('resetBtn').disabled = true;
+    status('Сохраняю…');
+    var i = 0;
+    (function next(){
+      if (i >= batches.length) return done();
+      api('/api/save', { method: 'POST', body: JSON.stringify(batches[i]) }).then(function(){ i++; next(); }).catch(fail);
+    })();
+    function done(){
+      Object.keys(text).forEach(function(k){ (saved.text = saved.text || {})[k] = text[k]; var el = doc.querySelector('[data-edit="' + k + '"]'); if (el) el.classList.remove('changed'); });
+      if (pendingCode) saved.code = pendingCode;
+      doc.querySelectorAll('[data-img]').forEach(function(w){ w.style.outline = ''; });
+      dirtyText = {}; pendingImages = {}; pendingCode = null; updateButtons();
+      status('Сохранено. На сайте изменения появятся примерно через минуту.', 'ok');
+      toast('Сохранено. Сайт обновится примерно через минуту.', 6000);
+    }
+    function fail(err){
+      updateButtons();
+      if (err.status === 401) { store('ups-admin', null); status('Пароль больше не подходит. Войдите заново.', 'bad'); return; }
+      status('Не сохранилось: ' + err.message, 'bad');
+      toast('Не сохранилось: ' + err.message, 7000);
+    }
+  });
+
+  window.addEventListener('beforeunload', function(e){ if (changes()) { e.preventDefault(); e.returnValue = ''; } });
+})();
+</script>
+</body>
+</html>

@@ -27,8 +27,8 @@ module.exports = async (req, res) => {
     }
 
     if (body.code !== undefined) {
-      const code = String(body.code).trim();
-      if (!/^[0-9A-Za-z#*]{1,12}$/.test(code)) throw httpError(400, 'Код двери: только цифры и буквы, до 12 знаков');
+      const code = String(body.code).trim().replace(/\s+/g, '').toUpperCase();
+      if (!/^[0-9A-Za-zА-Яа-яЁё#*]{1,12}$/.test(code)) throw httpError(400, 'Код двери: только цифры и буквы, до 12 знаков');
       content.code = code;
       changed.push('code');
     }
